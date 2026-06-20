@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Zap, ArrowRight } from 'lucide-react'
+import { Zap, ArrowRight, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 
 interface AM14Powerhouse {
@@ -108,19 +108,29 @@ export default function AM14DashboardPage() {
             <div className="flex items-center justify-between gap-3 p-4 border-b border-line">
               <div className="flex items-center gap-2">
                 <Zap size={16} className="text-ink-muted" aria-hidden="true" />
-                <h2 className="text-base font-semibold text-ink">Electrical Power Generation</h2>
+                <h2 className="text-base font-semibold text-ink">Power Generation</h2>
               </div>
-              {error ? (
-                <span className="inline-flex items-center gap-1.5 text-xs text-danger">
-                  <span className="w-1.5 h-1.5 rounded-full bg-danger" />
-                  Reconnecting…
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
-                  <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-                  Live
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {error ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-danger">
+                    <span className="w-1.5 h-1.5 rounded-full bg-danger" />
+                    Reconnecting…
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
+                    Live
+                  </span>
+                )}
+                {/* TODO: wire to historical report (e.g. /dashboard/am14/powerhouse/summary) */}
+                <button
+                  type="button"
+                  aria-label="View historical report"
+                  className="w-8 h-8 -mr-1 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
+                >
+                  <BarChart3 size={16} />
+                </button>
+              </div>
             </div>
 
             {/* Donut */}
@@ -179,7 +189,7 @@ export default function AM14DashboardPage() {
 
               {/* Single, clear details affordance */}
               <Link
-                href="/dashboard/am14"
+                href="/dashboard/am14/powerhouse"
                 className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-ink-secondary hover:text-ink transition-colors"
               >
                 View details

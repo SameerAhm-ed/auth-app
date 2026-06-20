@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Sun, Flame, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { LayoutDashboard, Sun, Flame, Factory, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useMobileSidebar } from './MobileSidebar'
 
 interface Props {
@@ -25,6 +25,12 @@ const NAV_ITEMS = [
   { label: 'Solar',     path: '/solar', icon: Sun             },
   { label: 'Steam',     path: '/steam', icon: Flame           },
 ]
+
+// Extra nav items that only exist for specific sites (avoids dead links on
+// sites that don't have these pages yet).
+const SITE_EXTRA_NAV: Record<string, { label: string; path: string; icon: typeof LayoutDashboard }[]> = {
+  am14: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
+}
 
 /**
  * Inner content shared by the desktop rail and the mobile drawer.
@@ -87,7 +93,7 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
         <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
           {label} Pages
         </p>
-        {NAV_ITEMS.map(({ label: navLabel, path, icon: Icon }) => {
+        {[...NAV_ITEMS, ...(SITE_EXTRA_NAV[site] ?? [])].map(({ label: navLabel, path, icon: Icon }) => {
           const href     = base + path
           const isActive = path === '' ? pathname === base : pathname.startsWith(href)
 
