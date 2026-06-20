@@ -30,6 +30,7 @@ const NAV_ITEMS = [
 // sites that don't have these pages yet).
 const SITE_EXTRA_NAV: Record<string, { label: string; path: string; icon: typeof LayoutDashboard }[]> = {
   am14: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
+  am15: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
 }
 
 /**
