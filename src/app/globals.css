@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Enable class-based dark mode (toggle by adding `.dark` on <html>).
+   We theme via CSS variables below, but this also lets future `dark:`
+   utilities respond to the class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ──────────────────────────────────────────────────────────────
+   Design tokens — single source of truth for the whole app.
+   The palette is intentionally GRAYSCALE for now. To re-theme the
+   app later, change the values here only; every screen reads these.
+   Tailwind v4 generates utilities from each --color-* token, e.g.
+   bg-surface, text-ink, border-line, bg-brand, ring-brand, etc.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  /* Surfaces */
+  --color-canvas: #f5f5f5;        /* page background            */
+  --color-surface: #ffffff;       /* cards, navbar, sidebar     */
+  --color-surface-subtle: #ececed;/* badges, avatars, chips     */
+
+  /* Lines */
+  --color-line: #e2e2e4;          /* default borders            */
+  --color-line-strong: #c8c8cb;   /* inputs, stronger borders   */
+
+  /* Text — all AA-contrast (≥4.5:1) on surface/canvas */
+  --color-ink: #1c1c1e;           /* primary text               */
+  --color-ink-secondary: #5b5e62; /* secondary text             */
+  --color-ink-muted: #6c6f74;     /* muted text, placeholders   */
+
+  /* Brand / accent — grayscale for now, swap later */
+  --color-brand: #3f3f46;
+  --color-brand-hover: #27272a;
+  --color-brand-subtle: #ececed;
+  --color-brand-fg: #ffffff;      /* text/icon on a brand fill  */
+
+  /* Danger / error (kept semantic, AA-contrast text) */
+  --color-danger: #b42318;
+  --color-danger-bg: #fef3f2;
+  --color-danger-line: #fecdca;
+}
+
+/* ── Dark theme overrides ─────────────────────────────────────
+   Same token names, dark values. Because every component reads the
+   tokens, adding `.dark` to <html> flips the whole app. */
+.dark {
+  --color-canvas: #0f0f10;
+  --color-surface: #1a1a1c;
+  --color-surface-subtle: #2a2a2e;
+
+  --color-line: #2e2e31;
+  --color-line-strong: #3f3f43;
+
+  --color-ink: #f4f4f5;
+  --color-ink-secondary: #a1a1aa;
+  --color-ink-muted: #8b8b92;
+
+  --color-brand: #52525b;
+  --color-brand-hover: #71717a;
+  --color-brand-subtle: #2a2a2e;
+  --color-brand-fg: #ffffff;
+
+  --color-danger: #f87171;
+  --color-danger-bg: #2a1416;
+  --color-danger-line: #5b2a26;
+}
+
+:root { color-scheme: light; }
+.dark { color-scheme: dark; }
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Visible keyboard focus for interactive elements (a11y quick win) */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
