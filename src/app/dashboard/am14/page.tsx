@@ -32,7 +32,7 @@ const CIRC = 2 * Math.PI * RADIUS
 const GAP = 10 // visual spacing between segments (in path units)
 
 async function getData() {
-  const res = await fetch('/api/v1/powerhouseam14', {
+  const res = await fetch('/api/v1/am14/powerhouse', {
     method: 'GET',
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },

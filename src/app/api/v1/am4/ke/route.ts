@@ -7,19 +7,14 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const pool = await sql.connect(config);
-
     const result = await pool
       .request()
-      .query("SELECT * FROM AM14_POWERHOUSE");
-
+      .query(
+        "SELECT KE_1_KW, KE_1_ERROR, KE_2_KW, KE_2_ERROR, KE_3_KW, KE_3_ERROR FROM AM04Powerhouse"
+      );
     return NextResponse.json({ data: result.recordset });
   } catch (error) {
-    // Log the full detail server-side only; don't leak DB/SQL internals to the client.
     console.error("FULL SQL ERROR:", error);
-
-    return NextResponse.json(
-      { error: "Failed to load power generation data" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to load KE data" }, { status: 500 });
   }
 }

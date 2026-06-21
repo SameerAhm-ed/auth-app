@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Sun, Flame, Factory, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useMobileSidebar } from './MobileSidebar'
 
 interface Props {
@@ -29,6 +29,10 @@ const NAV_ITEMS = [
 // Extra nav items that only exist for specific sites (avoids dead links on
 // sites that don't have these pages yet).
 const SITE_EXTRA_NAV: Record<string, { label: string; path: string; icon: typeof LayoutDashboard }[]> = {
+  am4: [
+    { label: 'Powerhouse', path: '/powerhouse', icon: Factory },
+    { label: 'K.E', path: '/ke', icon: Zap },
+  ],
   am14: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
   am15: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
 }

@@ -1,33 +1,47 @@
-// /dashboard/am4/solar/page.tsx
+// /dashboard/am4/powerhouse/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { ChevronLeft, BarChart3, Sun } from 'lucide-react'
+import { ChevronLeft, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 
-interface AM04Solar {
+interface AM04Powerhouse {
   id: number
-  SOLAR_A_KW: number
-  SOLAR_A_ERROR: number
-  SOLAR_B_KW: number
-  SOLAR_B_ERROR: number
-  SOLAR_C_KW: number
-  SOLAR_C_ERROR: number
+  ENGINE_1_KW: number
+  ENGINE_1_ERROR: number
+  ENGINE_2_KW: number
+  ENGINE_2_ERROR: number
+  ENGINE_3_KW: number
+  ENGINE_3_ERROR: number
+  ENGINE_4_KW: number
+  ENGINE_4_ERROR: number
+  ENGINE_6_KW: number
+  ENGINE_6_ERROR: number
+  ENGINE_7_KW: number
+  ENGINE_7_ERROR: number
+  AM04_DISTRIBUTION: number
 }
 
-type SolarCfg = {
+type EngineCfg = {
   id: string
   label: string
   capacity: number
-  kw: keyof AM04Solar
-  err: keyof AM04Solar
+  kw: keyof AM04Powerhouse
+  err?: keyof AM04Powerhouse
 }
 
-const UNITS: SolarCfg[] = [
-  { id: 'SOLAR_A', label: 'Solar A', capacity: 379, kw: 'SOLAR_A_KW', err: 'SOLAR_A_ERROR' },
-  { id: 'SOLAR_B', label: 'Solar B', capacity: 388, kw: 'SOLAR_B_KW', err: 'SOLAR_B_ERROR' },
-  { id: 'SOLAR_C', label: 'Solar C', capacity: 550, kw: 'SOLAR_C_KW', err: 'SOLAR_C_ERROR' },
+const ENGINES: EngineCfg[] = [
+  { id: 'E1', label: 'E1 320', capacity: 1064, kw: 'ENGINE_1_KW', err: 'ENGINE_1_ERROR' },
+  { id: 'E2', label: 'E2 420', capacity: 1495, kw: 'ENGINE_2_KW', err: 'ENGINE_2_ERROR' },
+  { id: 'E3', label: 'E3 420', capacity: 1415, kw: 'ENGINE_3_KW', err: 'ENGINE_3_ERROR' },
+  { id: 'E4', label: 'E4 420', capacity: 1490, kw: 'ENGINE_4_KW', err: 'ENGINE_4_ERROR' },
+  { id: 'E6', label: 'E6 3412', capacity: 520, kw: 'ENGINE_6_KW', err: 'ENGINE_6_ERROR' },
+  { id: 'E7', label: 'E7 C18', capacity: 648, kw: 'ENGINE_7_KW', err: 'ENGINE_7_ERROR' },
+]
+
+const UTILIZATION: EngineCfg[] = [
+  { id: 'AM04_DIS', label: 'AM04 Distribution', capacity: 1600, kw: 'AM04_DISTRIBUTION' },
 ]
 
 function statusOf(error: number, load: number): { text: string; color: string } {
@@ -37,7 +51,7 @@ function statusOf(error: number, load: number): { text: string; color: string } 
 }
 
 async function getData() {
-  const res = await fetch('/api/v1/am4/solar', {
+  const res = await fetch('/api/v1/am4/powerhouse', {
     method: 'GET',
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
@@ -46,8 +60,8 @@ async function getData() {
   return res.json()
 }
 
-export default function AM4SolarPage() {
-  const [data, setData] = useState<AM04Solar[]>([])
+export default function PowerhouseAM4Page() {
+  const [data, setData] = useState<AM04Powerhouse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -62,7 +76,7 @@ export default function AM4SolarPage() {
           setError('')
         }
       } catch {
-        if (!cancelled) setError('Failed to load solar data')
+        if (!cancelled) setError('Failed to load powerhouse data')
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -85,32 +99,48 @@ export default function AM4SolarPage() {
           <ChevronLeft size={15} />
           AM4 overview
         </Link>
-        <h1 className="text-2xl font-semibold text-ink mb-1">AM4 Solar</h1>
-        <p className="text-sm text-ink-secondary">Per-array solar generation and status.</p>
+        <h1 className="text-2xl font-semibold text-ink mb-1">AM4 Powerhouse</h1>
+        <p className="text-sm text-ink-secondary">Per-engine load and operational status.</p>
       </div>
 
       {loading ? (
-        <SolarGridSkeleton count={3} />
+        <EngineGridSkeleton count={6} />
       ) : error && !row ? (
-        <SolarError message={error} />
+        <PowerhouseError message={error} />
       ) : !row ? (
-        <SolarEmpty />
+        <PowerhouseEmpty />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {UNITS.map((u) => (
-            <SolarCard key={u.id} cfg={u} load={row[u.kw] ?? 0} error={row[u.err] ?? 0} />
-          ))}
+        <div className="space-y-8">
+          <section>
+            <h2 className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">Generation</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {ENGINES.map((e) => (
+                <EngineCard key={e.id} cfg={e} load={row[e.kw] ?? 0} error={e.err ? (row[e.err] ?? 0) : 0} />
+              ))}
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">Utilization</h2>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {UTILIZATION.map((e) => (
+                <EngineCard key={e.id} cfg={e} load={row[e.kw] ?? 0} error={e.err ? (row[e.err] ?? 0) : 0} />
+              ))}
+            </div>
+          </section>
         </div>
       )}
     </div>
   )
 }
 
+/* ── Engine card ─────────────────────────────────────────────────── */
+
 const R = 54
 const SW = 12
 const C = 2 * Math.PI * R
 
-function SolarCard({ cfg, load, error }: { cfg: SolarCfg; load: number; error: number }) {
+function EngineCard({ cfg, load, error }: { cfg: EngineCfg; load: number; error: number }) {
   const pct = cfg.capacity > 0 ? Math.min(Math.max((load / cfg.capacity) * 100, 0), 100) : 0
   const status = statusOf(error, load)
   const dash = (pct / 100) * C
@@ -118,10 +148,7 @@ function SolarCard({ cfg, load, error }: { cfg: SolarCfg; load: number; error: n
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-2 mb-3">
-        <div className="flex items-center gap-2">
-          <Sun size={16} className="text-ink-muted" aria-hidden="true" />
-          <h3 className="text-sm font-semibold text-ink">{cfg.label}</h3>
-        </div>
+        <h3 className="text-sm font-semibold text-ink">{cfg.label}</h3>
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold" style={{ color: status.color }}>
             <span className="w-2 h-2 rounded-full" style={{ backgroundColor: status.color }} />
@@ -160,7 +187,9 @@ function SolarCard({ cfg, load, error }: { cfg: SolarCfg; load: number; error: n
   )
 }
 
-function SolarGridSkeleton({ count }: { count: number }) {
+/* ── States ──────────────────────────────────────────────────────── */
+
+function EngineGridSkeleton({ count }: { count: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {Array.from({ length: count }).map((_, i) => (
@@ -182,21 +211,20 @@ function SolarGridSkeleton({ count }: { count: number }) {
   )
 }
 
-function SolarEmpty() {
+function PowerhouseEmpty() {
   return (
     <Card className="p-10 text-center">
-      <Sun size={24} className="mx-auto mb-3 text-ink-muted" aria-hidden="true" />
-      <h2 className="text-base font-semibold text-ink mb-1">No solar data</h2>
-      <p className="text-sm text-ink-secondary">There&apos;s no solar data to show right now.</p>
+      <h2 className="text-base font-semibold text-ink mb-1">No engine data</h2>
+      <p className="text-sm text-ink-secondary">There&apos;s no powerhouse data to show right now.</p>
     </Card>
   )
 }
 
-function SolarError({ message }: { message: string }) {
+function PowerhouseError({ message }: { message: string }) {
   return (
     <Card className="p-10 text-center">
       <div className="w-12 h-12 bg-danger-bg rounded-xl flex items-center justify-center mx-auto mb-4">
-        <Sun size={22} className="text-danger" aria-hidden="true" />
+        <ChevronLeft size={22} className="text-danger rotate-180" aria-hidden="true" />
       </div>
       <h2 className="text-base font-semibold text-ink mb-1">Couldn&apos;t load data</h2>
       <p className="text-sm text-ink-secondary mb-5">{message}</p>

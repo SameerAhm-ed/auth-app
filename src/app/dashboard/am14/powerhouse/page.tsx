@@ -45,7 +45,7 @@ function statusOf(error: number, load: number): { text: string; color: string } 
 }
 
 async function getData() {
-  const res = await fetch('/api/v1/powerhouseam14', {
+  const res = await fetch('/api/v1/am14/powerhouse', {
     method: 'GET',
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },

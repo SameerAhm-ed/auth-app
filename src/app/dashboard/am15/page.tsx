@@ -38,7 +38,7 @@ const CIRC = 2 * Math.PI * RADIUS
 const GAP = 10
 
 async function getData() {
-  const res = await fetch('/api/v1/powerhouseam15', {
+  const res = await fetch('/api/v1/am15/powerhouse', {
     method: 'GET',
     cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
