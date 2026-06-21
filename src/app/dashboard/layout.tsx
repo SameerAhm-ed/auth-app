@@ -4,6 +4,7 @@ import LogoutButton from '@/components/LogoutButton'
 import MobileMenuButton from '@/components/MobileMenuButton'
 import { MobileSidebarProvider } from '@/components/MobileSidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { InstallButton } from '@/components/InstallButton'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const headersList = await headers()
@@ -21,14 +22,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {/* Left: mobile menu + logo */}
           <div className="flex items-center gap-1.5">
             <MobileMenuButton />
-            <Link href="/dashboard" className="flex items-center gap-2.5 rounded-md" aria-label="AuthApp home">
+            <Link href="/dashboard" className="flex items-center gap-2.5 rounded-md" aria-label="Artistic Milliners home">
               <div className="w-7 h-7 bg-brand rounded-md flex items-center justify-center shrink-0">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
                     stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-[15px] font-semibold text-ink">AuthApp</span>
+              <span className="hidden sm:block text-[15px] font-semibold text-ink">Artistic Milliners</span>
             </Link>
           </div>
 
@@ -42,6 +43,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
               {initials}
             </div>
             <div className="w-px h-5 bg-line mx-1 hidden sm:block" />
+            <InstallButton />
             <ThemeToggle />
             <LogoutButton />
           </div>

@@ -1,9 +1,17 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
 
 export const metadata: Metadata = {
-  title: 'Auth App',
-  description: 'Login and registration with role-based access',
+  title: 'Artistic Milliners Dashboard',
+  description: 'Energy management & monitoring dashboard',
+  applicationName: 'EMS',
+  appleWebApp: { capable: true, statusBarStyle: 'default', title: 'EMS' },
+  icons: { apple: '/icons/apple-touch-icon.png' },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#3f3f46',
 }
 
 // Runs before paint to set the theme class, avoiding a light/dark flash.
@@ -15,7 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   )
 }
