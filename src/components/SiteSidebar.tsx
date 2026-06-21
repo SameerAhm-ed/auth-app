@@ -37,6 +37,43 @@ const SITE_EXTRA_NAV: Record<string, { label: string; path: string; icon: typeof
   am15: [{ label: 'Powerhouse', path: '/powerhouse', icon: Factory }],
 }
 
+type NavItem = { label: string; path: string; icon: typeof LayoutDashboard }
+type NavGroup = { heading?: string; items: NavItem[] }
+
+// Sites with many pages get fully custom, grouped nav (overrides the default).
+const SITE_NAV: Record<string, NavGroup[]> = {
+  am5: [
+    { items: [{ label: 'Dashboard', path: '', icon: LayoutDashboard }] },
+    {
+      heading: 'Power Houses',
+      items: [
+        { label: 'Power House 1', path: '/powerhouse1', icon: Factory },
+        { label: 'Power House 2', path: '/powerhouse2', icon: Factory },
+        { label: 'Power House 3', path: '/powerhouse3', icon: Factory },
+        { label: 'Power House 4', path: '/powerhouse4', icon: Factory },
+      ],
+    },
+    {
+      heading: 'Steam',
+      items: [
+        { label: 'Steam PH 1', path: '/steamph1', icon: Flame },
+        { label: 'Steam PH 2', path: '/steamph2', icon: Flame },
+        { label: 'Steam PH 3', path: '/steamph3', icon: Flame },
+        { label: 'Steam PH 4', path: '/steamph4', icon: Flame },
+        { label: 'Coal Boiler 1', path: '/coalboiler1', icon: Flame },
+        { label: 'Coal Boiler 2', path: '/coalboiler2', icon: Flame },
+      ],
+    },
+    { items: [{ label: 'Solar', path: '/solar', icon: Sun }] },
+  ],
+}
+
+// Grouped nav for a site: custom if defined, else the default flat list.
+function navGroupsFor(site: string, label: string): NavGroup[] {
+  if (SITE_NAV[site]) return SITE_NAV[site]
+  return [{ heading: `${label} Pages`, items: [...NAV_ITEMS, ...(SITE_EXTRA_NAV[site] ?? [])] }]
+}
+
 /**
  * Inner content shared by the desktop rail and the mobile drawer.
  * Rows are 44px tall on mobile (touch target) and condense to 36px on desktop.
@@ -93,28 +130,34 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
         </div>
       )}
 
-      {/* Current site page nav */}
-      <nav className="flex-1 px-3 py-3 space-y-0.5">
-        <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
-          {label} Pages
-        </p>
-        {[...NAV_ITEMS, ...(SITE_EXTRA_NAV[site] ?? [])].map(({ label: navLabel, path, icon: Icon }) => {
-          const href     = base + path
-          const isActive = path === '' ? pathname === base : pathname.startsWith(href)
+      {/* Current site page nav (grouped) */}
+      <nav className="flex-1 px-3 py-3 space-y-3 overflow-y-auto">
+        {navGroupsFor(site, label).map((group, gi) => (
+          <div key={group.heading ?? gi} className="space-y-0.5">
+            {group.heading && (
+              <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
+                {group.heading}
+              </p>
+            )}
+            {group.items.map(({ label: navLabel, path, icon: Icon }) => {
+              const href     = base + path
+              const isActive = path === '' ? pathname === base : pathname.startsWith(href)
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-2.5 h-11 md:h-9 px-3 rounded-lg text-sm font-medium transition-colors ${
-                isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
-              }`}
-            >
-              <Icon size={15} />
-              {navLabel}
-            </Link>
-          )
-        })}
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-2.5 h-11 md:h-9 px-3 rounded-lg text-sm font-medium transition-colors ${
+                    isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
+                  }`}
+                >
+                  <Icon size={15} />
+                  {navLabel}
+                </Link>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
       {/* Back to overview */}

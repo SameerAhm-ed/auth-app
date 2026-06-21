@@ -1,0 +1,25 @@
+// /dashboard/am5/coalboiler1/page.tsx
+'use client'
+
+import { BoilerPage } from '@/components/metrics/BoilerPage'
+
+export default function CoalBoiler1Page() {
+  return (
+    <BoilerPage
+      title="Coal Boiler 1"
+      subtitle="OS boiler steam flow and status."
+      endpoint="/api/v1/am5/steamph3"
+      boilers={[
+        {
+          label: 'OS Boiler',
+          flow: 'steamflow',
+          capacity: 15,
+          metrics: [
+            { label: 'Pressure', key: 'steampressure', unit: 'PSI' },
+            { label: 'Water', key: 'waterflow', unit: 'M³/H' },
+          ],
+        },
+      ]}
+    />
+  )
+}

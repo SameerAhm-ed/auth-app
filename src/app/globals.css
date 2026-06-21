@@ -84,3 +84,10 @@ body {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
+
+/* Flowing dashed line for the EnergyFlow diagram */
+@keyframes energyflow {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
