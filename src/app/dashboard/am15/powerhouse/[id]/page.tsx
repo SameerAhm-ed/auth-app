@@ -15,6 +15,8 @@ const LABELS: Record<string, string> = {
   LT_2: 'Load Takeoff 2',
   LT_3: 'Load Takeoff 3',
   SOLAR_TW: 'Solar TW',
+  ST1: 'Steam Tower 1',
+  ST2: 'Steam Tower 2',
 }
 
 export default async function AM15ReportPage({ params }: { params: Promise<{ id: string }> }) {
