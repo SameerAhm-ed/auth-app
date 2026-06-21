@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ServiceWorkerRegister } from '@/components/ServiceWorkerRegister'
+import { IosInstallHint } from '@/components/IosInstallHint'
 
 export const metadata: Metadata = {
   title: 'Artistic Milliners Dashboard',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="antialiased">
         {children}
         <ServiceWorkerRegister />
+        <IosInstallHint />
       </body>
     </html>
   )
