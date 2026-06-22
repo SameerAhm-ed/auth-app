@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Zap, Flame, Gauge, Network, ChevronRight } from 'lucide-react'
+import { Zap, Flame, Gauge, Network, ChevronRight, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Donut } from '@/components/metrics/Donut'
 import EnergyFlow from '@/components/EnergyFlow'
@@ -217,7 +217,19 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
 
       {/* Steam generation */}
       <Card className="overflow-hidden">
-        <CardHead icon={<Flame size={16} className="text-ink-muted" aria-hidden="true" />} title="Steam Generation" />
+        <CardHead
+          icon={<Flame size={16} className="text-ink-muted" aria-hidden="true" />}
+          title="Steam Generation"
+          action={
+            <Link
+              href="/dashboard/am5/reports/steam"
+              aria-label="Open steam generation report"
+              className="w-11 h-11 md:w-9 md:h-9 -mr-1 shrink-0 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
+            >
+              <BarChart3 size={16} />
+            </Link>
+          }
+        />
         <div className="p-5">
           <Donut segments={steam} hero={steamTotal.toFixed(1)} sublabel={`T/H · ${row.steam_pressure_mainheader_2_and_3.toFixed(0)} PSI`} />
         </div>
@@ -258,11 +270,14 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
 
 /* ── small building blocks ───────────────────────────────────────── */
 
-function CardHead({ icon, title }: { icon: React.ReactNode; title: string }) {
+function CardHead({ icon, title, action }: { icon: React.ReactNode; title: string; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 p-4 border-b border-line">
-      {icon}
-      <h2 className="text-base font-semibold text-ink">{title}</h2>
+    <div className="flex items-center justify-between gap-2 p-4 border-b border-line">
+      <div className="flex items-center gap-2 min-w-0">
+        {icon}
+        <h2 className="text-base font-semibold text-ink truncate">{title}</h2>
+      </div>
+      {action}
     </div>
   )
 }
