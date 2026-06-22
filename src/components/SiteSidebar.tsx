@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react'
@@ -177,31 +177,63 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
 export default function SiteSidebar({ site, label, allowedSites }: Props) {
   const pathname = usePathname()
   const { open, setOpen } = useMobileSidebar()
+  const drawerRef = useRef<HTMLElement>(null)
 
   // Close the drawer whenever the route changes (e.g. after tapping a link).
   useEffect(() => {
     setOpen(false)
   }, [pathname, setOpen])
 
-  // Lock body scroll + close on Escape while the drawer is open.
+  // While the drawer is open: lock body scroll, close on Escape, trap focus
+  // inside the drawer, and restore focus to the opener on close.
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
+    const drawer = drawerRef.current
+    const prevOverflow = document.body.style.overflow
+    const prevFocused = document.activeElement as HTMLElement | null
     document.body.style.overflow = 'hidden'
+
+    const focusables = () =>
+      Array.from(
+        drawer?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null)
+
+    focusables()[0]?.focus()
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        return
+      }
+      if (e.key !== 'Tab') return
+      const items = focusables()
+      if (items.length === 0) return
+      const first = items[0]
+      const last = items[items.length - 1]
+      const active = document.activeElement
+      if (e.shiftKey && active === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', onKey)
+
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = prevOverflow
       window.removeEventListener('keydown', onKey)
+      prevFocused?.focus?.()
     }
   }, [open, setOpen])
 
   return (
     <>
       {/* Desktop rail */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-surface border-r border-line min-h-[calc(100vh-56px)]">
+      <aside className="hidden md:flex w-56 shrink-0 flex-col bg-surface border-r border-line min-h-[calc(100dvh-56px)]">
         <SidebarBody site={site} label={label} allowedSites={allowedSites} />
       </aside>
 
@@ -216,11 +248,12 @@ export default function SiteSidebar({ site, label, allowedSites }: Props) {
 
       {/* Mobile drawer */}
       <aside
+        ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Site navigation"
         inert={!open}
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82%] flex flex-col bg-surface border-r border-line md:hidden overflow-y-auto transition-transform duration-200 ease-out ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[82%] flex flex-col bg-surface border-r border-line md:hidden overflow-y-auto pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] transition-transform duration-200 ease-out ${
           open ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -230,7 +263,7 @@ export default function SiteSidebar({ site, label, allowedSites }: Props) {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close navigation menu"
-            className="w-10 h-10 -mr-2 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
+            className="w-11 h-11 -mr-2 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
           >
             <X size={18} />
           </button>

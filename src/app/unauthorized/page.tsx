@@ -22,7 +22,7 @@ export default function UnauthorizedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-canvas flex items-center justify-center px-4">
       <Card className="shadow-sm p-10 w-full max-w-[400px] text-center">
         <div className="w-14 h-14 bg-danger-bg rounded-xl flex items-center justify-center mx-auto mb-5">
           <ShieldOff size={24} className="text-danger" aria-hidden="true" />

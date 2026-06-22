@@ -5,7 +5,7 @@ export const metadata = { title: 'Offline · EMS' }
 
 export default function OfflinePage() {
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-canvas flex items-center justify-center px-4">
       <Card className="shadow-sm p-10 w-full max-w-[400px] text-center">
         <div className="w-14 h-14 bg-surface-subtle rounded-xl flex items-center justify-center mx-auto mb-5">
           <WifiOff size={24} className="text-ink-muted" aria-hidden="true" />

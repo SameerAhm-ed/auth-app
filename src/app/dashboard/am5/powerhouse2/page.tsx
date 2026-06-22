@@ -7,28 +7,35 @@ import { useLiveData } from '@/components/metrics/useLiveData'
 import { MetricCard } from '@/components/metrics/MetricCard'
 import { MetricGridSkeleton, StateCard } from '@/components/metrics/MetricStates'
 import { loadStatus, fuelFromBit } from '@/components/metrics/status'
+import { reportHref } from '@/components/metrics/reportLink'
 
 type Row = Record<string, number>
 
-// Generation: dynamic fuel from the `*bit` field (1=N-GAS, 2=R-LNG, 3=IND).
-const ENGINES = [
-  { key: 'turbinekw', bit: 'turbinebit', label: 'Turbine', capacity: 5700 },
-  { key: 'engine1kw', bit: 'engine1bit', label: 'Engine 1', capacity: 1400 },
-  { key: 'engine2kw', bit: 'engine2bit', label: 'Engine 2', capacity: 1500 },
-  { key: 'engine3kw', bit: 'engine3bit', label: 'Engine 3', capacity: 1500 },
-  { key: 'engine4kw', bit: 'engine4bit', label: 'Engine 4', capacity: 1500 },
-  { key: 'engine5kw', bit: 'engine5bit', label: 'Engine 5', capacity: 1500 },
-  { key: 'engine6kw', bit: 'engine6bit', label: 'Engine 6', capacity: 1500 },
-] as const
+// `tag` = EMS tag id for the historical report (omit → no report icon yet).
+type EngineCfg = { key: string; bit: string; label: string; capacity: number; tag?: number }
+type TakeoffCfg = { key: string; label: string; capacity?: number; tag?: number }
 
-const TAKEOFFS = [
+// Generation: dynamic fuel from the `*bit` field (1=N-GAS, 2=R-LNG, 3=IND).
+const ENGINES: EngineCfg[] = [
+  { key: 'turbinekw', bit: 'turbinebit', label: 'Turbine', capacity: 5700, tag: 1627 },
+  { key: 'engine1kw', bit: 'engine1bit', label: 'Engine 1', capacity: 1400, tag: 286 },
+  { key: 'engine2kw', bit: 'engine2bit', label: 'Engine 2', capacity: 1500, tag: 287 },
+  { key: 'engine3kw', bit: 'engine3bit', label: 'Engine 3', capacity: 1500, tag: 288 },
+  { key: 'engine4kw', bit: 'engine4bit', label: 'Engine 4', capacity: 1500, tag: 289 },
+  { key: 'engine5kw', bit: 'engine5bit', label: 'Engine 5', capacity: 1500, tag: 290 },
+  { key: 'engine6kw', bit: 'engine6bit', label: 'Engine 6', capacity: 1500, tag: 291 },
+]
+
+const TAKEOFFS: TakeoffCfg[] = [
   { key: 'Takeoff4kw', label: 'Weaving Shade 4', capacity: 2500 },
   { key: 'Takeoff5kw', label: 'Weaving Shade 5 & 6', capacity: 2500 },
   { key: 'Takeoff6kw', label: 'Processing Unit', capacity: 2500 },
   { key: 'Takeoff7kw', label: 'Spinning AM-8', capacity: 6000 },
   { key: 'Takeoff8kw', label: 'Spinning AM-17', capacity: 6000 },
   { key: 'AUX_LV_Takeoff', label: 'Auxiliary Load PH-2', capacity: 1565 },
-] as const
+]
+
+const BACK = { back: '/dashboard/am5/powerhouse2', backLabel: 'Power House 2' }
 
 export default function PowerHouse2Page() {
   const { data, loading, error } = useLiveData<Row>('/api/v1/am5/powerhouse2')
@@ -66,6 +73,7 @@ export default function PowerHouse2Page() {
                     capacity={e.capacity}
                     status={loadStatus(value, 10)}
                     fuel={fuelFromBit(row[e.bit])}
+                    reportHref={reportHref({ tag: e.tag, label: e.label, unit: 'kWh', ...BACK })}
                   />
                 )
               })}
@@ -77,7 +85,7 @@ export default function PowerHouse2Page() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TAKEOFFS.map((t) => {
                 const value = Math.trunc(row[t.key] ?? 0)
-                return <MetricCard key={t.key} label={t.label} value={value} capacity={t.capacity} status={loadStatus(value, 10)} />
+                return <MetricCard key={t.key} label={t.label} value={value} capacity={t.capacity} status={loadStatus(value, 10)} reportHref={reportHref({ tag: t.tag, label: t.label, unit: 'kWh', ...BACK })} />
               })}
             </div>
           </section>

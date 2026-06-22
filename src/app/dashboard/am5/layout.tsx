@@ -8,14 +8,14 @@ export default async function AM5Layout({ children }: { children: React.ReactNod
   const allowedSites = ROLE_SITES[role] || []
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)]">
+    <div className="flex min-h-[calc(100dvh-56px)]">
       <SiteSidebar
         site="am5"
         label="AM5"
         accentColor="#2563eb"
         allowedSites={allowedSites}
       />
-      <main className="flex-1 p-6 bg-canvas overflow-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 p-6 bg-canvas overflow-auto">
         {children}
       </main>
     </div>

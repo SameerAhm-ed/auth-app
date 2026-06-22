@@ -15,10 +15,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <MobileSidebarProvider>
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-dvh bg-canvas">
+      {/* Skip to main content (keyboard / screen-reader users) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-surface focus:text-ink focus:shadow focus:ring-2 focus:ring-brand"
+      >
+        Skip to content
+      </a>
       {/* Top navbar */}
-      <header className="bg-surface border-b border-line sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+      <header className="bg-surface border-b border-line sticky top-0 z-20 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-7xl mx-auto pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))] h-14 flex items-center justify-between gap-4">
           {/* Left: mobile menu + logo */}
           <div className="flex items-center gap-1.5">
             <MobileMenuButton />

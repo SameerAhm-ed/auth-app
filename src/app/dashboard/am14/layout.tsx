@@ -8,14 +8,14 @@ export default async function AM14Layout({ children }: { children: React.ReactNo
   const allowedSites = ROLE_SITES[role] || []
 
   return (
-    <div className="flex min-h-[calc(100vh-56px)]">
+    <div className="flex min-h-[calc(100dvh-56px)]">
       <SiteSidebar
         site="am14"
         label="AM14"
         accentColor="#9333ea"
         allowedSites={allowedSites}
       />
-      <main className="flex-1 p-6 bg-canvas overflow-auto">
+      <main id="main-content" tabIndex={-1} className="flex-1 p-6 bg-canvas overflow-auto">
         {children}
       </main>
     </div>

@@ -9,6 +9,7 @@ export default function CoalBoiler2Page() {
       title="Coal Boiler 2"
       subtitle="OS boiler steam flow and status."
       endpoint="/api/v1/am5/steamph3"
+      report={{ back: '/dashboard/am5/coalboiler2', backLabel: 'Coal Boiler 2' }}
       boilers={[
         {
           label: 'OS Boiler 2',

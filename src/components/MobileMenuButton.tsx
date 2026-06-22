@@ -21,7 +21,7 @@ export default function MobileMenuButton() {
       type="button"
       onClick={() => setOpen(true)}
       aria-label="Open navigation menu"
-      className="md:hidden w-10 h-10 -ml-2 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
+      className="md:hidden w-11 h-11 -ml-2 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
     >
       <Menu size={20} />
     </button>

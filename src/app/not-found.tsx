@@ -4,7 +4,7 @@ import { buttonVariants } from '@/components/ui/Button'
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-canvas flex items-center justify-center px-4">
+    <div className="min-h-dvh bg-canvas flex items-center justify-center px-4">
       <Card className="shadow-sm p-10 w-full max-w-[400px] text-center">
         <p className="text-4xl font-bold text-ink mb-2">404</p>
         <h1 className="text-xl font-semibold text-ink mb-2">Page not found</h1>

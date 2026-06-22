@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#3f3f46',
+  viewportFit: 'cover', // let content extend under notches; we pad with safe-area insets
 }
 
 // Runs before paint to set the theme class, avoiding a light/dark flash.

@@ -20,7 +20,7 @@ export default async function OverviewPage() {
   const allowedSites = ROLE_SITES[role] || []
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <main id="main-content" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
       {/* Page header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-ink mb-1">Welcome, {name}</h1>
@@ -63,6 +63,6 @@ export default async function OverviewPage() {
           <p className="text-ink-secondary text-sm">No sites assigned to your account. Contact your administrator.</p>
         </div>
       )}
-    </div>
+    </main>
   )
 }

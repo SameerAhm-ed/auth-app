@@ -126,7 +126,7 @@ export default function AM14DashboardPage() {
                 <button
                   type="button"
                   aria-label="View historical report"
-                  className="w-8 h-8 -mr-1 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
+                  className="w-11 h-11 md:w-8 md:h-8 -mr-1 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
                 >
                   <BarChart3 size={16} />
                 </button>

@@ -8,6 +8,7 @@ export default function SteamPH1Page() {
     <BoilerPage
       title="Steam Power House 1"
       endpoint="/api/v1/am5/steamph1"
+      report={{ back: '/dashboard/am5/steamph1', backLabel: 'Steam Power House 1' }}
       boilers={[
         {
           label: 'Gas Fired Boiler',

@@ -26,8 +26,11 @@ export default function LogoutButton() {
       onClick={handleLogout}
       loading={loading}
       icon={<LogOut size={15} />}
+      aria-label="Log out"
+      className="h-11 md:h-9 px-2.5 sm:px-4"
     >
-      {loading ? 'Logging out…' : 'Log out'}
+      {/* Label hides on mobile to keep the navbar uncluttered (icon-only tap target). */}
+      <span className="hidden sm:inline">{loading ? 'Logging out…' : 'Log out'}</span>
     </Button>
   )
 }

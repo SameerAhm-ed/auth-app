@@ -41,7 +41,7 @@ export function InstallButton() {
     <button
       type="button"
       onClick={install}
-      className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg text-sm font-medium text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
+      className="inline-flex items-center justify-center gap-1.5 h-11 md:h-9 px-3 rounded-lg text-sm font-medium text-ink-secondary hover:text-ink hover:bg-canvas transition-colors"
     >
       <Download size={15} />
       <span className="hidden sm:inline">Install</span>

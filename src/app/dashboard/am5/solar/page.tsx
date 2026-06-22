@@ -148,6 +148,7 @@ export default function AM5SolarPage() {
                       capacity={a.capacity}
                       status={loadStatus(value)}
                       metrics={[{ label: 'Yesterday', value: energyText(a.tag) }]}
+                      reportHref={`/dashboard/am5/solar/${a.tag}?label=${encodeURIComponent(a.label)}`}
                     />
                   )
                 })}

@@ -8,6 +8,7 @@ export default function SteamPH2Page() {
     <BoilerPage
       title="Steam Power House 2"
       endpoint="/api/v1/am5/steamph2"
+      report={{ back: '/dashboard/am5/steamph2', backLabel: 'Steam Power House 2' }}
       boilers={[
         {
           label: 'HRSG',

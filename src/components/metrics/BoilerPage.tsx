@@ -6,6 +6,7 @@ import { useLiveData } from './useLiveData'
 import { MetricCard } from './MetricCard'
 import { MetricGridSkeleton, StateCard } from './MetricStates'
 import { loadStatus } from './status'
+import { reportHref } from './reportLink'
 
 type Row = Record<string, number>
 
@@ -17,6 +18,8 @@ export interface BoilerCfg {
   unit?: string
   /** Extra readouts (pressure, water, gas, …) pulled from the row. */
   metrics?: { label: string; key: string; unit: string }[]
+  /** EMS tag id for the historical report. Omit → no report icon yet. */
+  tag?: number
 }
 
 /**
@@ -28,11 +31,14 @@ export function BoilerPage({
   subtitle = 'Steam flow and operational status.',
   endpoint,
   boilers,
+  report,
 }: {
   title: string
   subtitle?: string
   endpoint: string
   boilers: BoilerCfg[]
+  /** Report-link context. Each boiler with a `tag` links to its historical report. */
+  report?: { back: string; backLabel: string; unit?: string }
 }) {
   const { data, loading, error } = useLiveData<Row>(endpoint)
   const row = data[0]
@@ -70,6 +76,13 @@ export function BoilerPage({
                   label: m.label,
                   value: `${(row[m.key] ?? 0).toLocaleString()} ${m.unit}`,
                 }))}
+                reportHref={reportHref({
+                  tag: b.tag,
+                  label: b.label,
+                  unit: report?.unit ?? 'T',
+                  back: report?.back,
+                  backLabel: report?.backLabel,
+                })}
               />
             )
           })}

@@ -97,14 +97,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="mt-5 p-3.5 bg-canvas rounded-lg">
-        <p className="text-xs font-medium text-ink-secondary mb-2">Test credentials</p>
-        <div className="space-y-1">
-          <p className="text-xs text-ink-secondary"><span className="font-medium text-ink">Admin:</span> admin@test.com / admin123</p>
-          <p className="text-xs text-ink-secondary"><span className="font-medium text-ink">Manager:</span> manager@test.com / manager123</p>
-          <p className="text-xs text-ink-secondary"><span className="font-medium text-ink">Single-site:</span> am4@test.com / am4pass123</p>
-        </div>
-      </div>
     </Card>
   )
 }

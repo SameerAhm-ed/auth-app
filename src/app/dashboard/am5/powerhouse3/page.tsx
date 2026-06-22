@@ -7,15 +7,18 @@ import { useLiveData } from '@/components/metrics/useLiveData'
 import { MetricCard } from '@/components/metrics/MetricCard'
 import { MetricGridSkeleton, StateCard } from '@/components/metrics/MetricStates'
 import { loadStatus, FUEL, type Fuel } from '@/components/metrics/status'
+import { reportHref } from '@/components/metrics/reportLink'
 
 type Row = Record<string, number>
 
+// `tag` = EMS tag id for the historical report (omit → no report icon yet).
 interface GenCfg {
   key: string
   label: string
   capacity: number
   fuel?: Fuel
   metrics?: (row: Row) => { label: string; value: React.ReactNode }[]
+  tag?: number
 }
 
 const ENGINES: GenCfg[] = [
@@ -28,12 +31,14 @@ const ENGINES: GenCfg[] = [
 ]
 
 // "Towards PH2" has no capacity → renders without a gauge.
-const TAKEOFFS: { key: string; label: string; capacity?: number }[] = [
+const TAKEOFFS: { key: string; label: string; capacity?: number; tag?: number }[] = [
   { key: 'Takeoff1kw', label: 'AM-18', capacity: 2250 },
   { key: 'Takeoff2kw', label: 'Towards PH2' },
   { key: 'Takeoff3kw', label: 'Auxiliary', capacity: 1250 },
   { key: 'Takeoff4kw', label: 'AM-17A', capacity: 5500 },
 ]
+
+const BACK = { back: '/dashboard/am5/powerhouse3', backLabel: 'Power House 3' }
 
 export default function PowerHouse3Page() {
   const { data, loading, error } = useLiveData<Row>('/api/v1/am5/powerhouse3')
@@ -72,6 +77,7 @@ export default function PowerHouse3Page() {
                     status={loadStatus(value)}
                     fuel={e.fuel}
                     metrics={e.metrics?.(row)}
+                    reportHref={reportHref({ tag: e.tag, label: e.label, unit: 'kWh', ...BACK })}
                   />
                 )
               })}
@@ -83,7 +89,7 @@ export default function PowerHouse3Page() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {TAKEOFFS.map((t) => {
                 const value = row[t.key] ?? 0
-                return <MetricCard key={t.key} label={t.label} value={value} capacity={t.capacity} status={loadStatus(value)} />
+                return <MetricCard key={t.key} label={t.label} value={value} capacity={t.capacity} status={loadStatus(value)} reportHref={reportHref({ tag: t.tag, label: t.label, unit: 'kWh', ...BACK })} />
               })}
             </div>
           </section>

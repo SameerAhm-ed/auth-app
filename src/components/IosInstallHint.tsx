@@ -57,7 +57,7 @@ export function IosInstallHint() {
           type="button"
           onClick={dismiss}
           aria-label="Dismiss"
-          className="w-8 h-8 -mr-1 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors shrink-0"
+          className="w-11 h-11 -mr-1 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors shrink-0"
         >
           <X size={16} />
         </button>
