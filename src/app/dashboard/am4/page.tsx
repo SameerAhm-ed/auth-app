@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Zap, Flame, BarChart3, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { Donut } from '@/components/metrics/Donut'
+import { useLiveData } from '@/components/metrics/useLiveData'
 
 interface AM04Powerhouse {
   id: number
@@ -20,6 +21,8 @@ interface AM04Powerhouse {
   SOLAR_B_KW: number
   SOLAR_C_KW: number
   BIOMASS_STEAM_FLOW: number
+  GB_BOSCH_STEAM: number
+  GB_ROBEY_STEAM: number
 }
 
 const ENGINE_FIELDS: (keyof AM04Powerhouse)[] = [
@@ -28,58 +31,14 @@ const ENGINE_FIELDS: (keyof AM04Powerhouse)[] = [
 const KE_FIELDS: (keyof AM04Powerhouse)[] = ['KE_1_KW', 'KE_2_KW', 'KE_3_KW']
 const SOLAR_FIELDS: (keyof AM04Powerhouse)[] = ['SOLAR_A_KW', 'SOLAR_B_KW', 'SOLAR_C_KW']
 
-const STEAM_CAPACITY = 10 // T/H (biomass)
+const STEAM_COLORS = ['#5b82c9', '#c06c9e', '#e0a83e']
 
 const fmtMW = (kw: number) => (kw / 1000).toFixed(2)
 const sum = (row: AM04Powerhouse, fields: (keyof AM04Powerhouse)[]) =>
   fields.reduce((acc, f) => acc + ((row[f] as number) ?? 0), 0)
 
-// ── SVG donut geometry ──
-const RADIUS = 80
-const STROKE = 40
-const CIRC = 2 * Math.PI * RADIUS
-const GAP = 10
-
-async function getData() {
-  const res = await fetch('/api/v1/am4/powerhouse', {
-    method: 'GET',
-    cache: 'no-store',
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!res.ok) throw new Error('Failed to fetch data')
-  return res.json()
-}
-
 export default function AM4DashboardPage() {
-  const [data, setData] = useState<AM04Powerhouse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    let cancelled = false
-
-    const refresh = async () => {
-      try {
-        const result = await getData()
-        if (!cancelled && result?.data) {
-          setData(result.data)
-          setError('')
-        }
-      } catch {
-        if (!cancelled) setError('Failed to load dashboard')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    refresh()
-    const id = setInterval(refresh, 1000)
-    return () => {
-      cancelled = true
-      clearInterval(id)
-    }
-  }, [])
-
+  const { data, loading, error } = useLiveData<AM04Powerhouse>('/api/v1/am4/powerhouse', 1000, 'Failed to load dashboard')
   const row = data[0]
 
   return (
@@ -115,13 +74,6 @@ function GenerationCard({ row, error }: { row: AM04Powerhouse; error: string }) 
   ]
   const totalKW = series.reduce((acc, s) => acc + s.value, 0)
 
-  const arcFor = (value: number) => (totalKW > 0 ? (value / totalKW) * CIRC : 0)
-  const segments = series.map((s, i) => {
-    const priorArc = series.slice(0, i).reduce((acc, p) => acc + arcFor(p.value), 0)
-    const dash = Math.max(arcFor(s.value) - GAP, 0)
-    return { color: s.color, dash, rest: CIRC - dash, offset: -priorArc }
-  })
-
   return (
     <Card className="overflow-hidden">
       <div className="flex items-center justify-between gap-3 p-4 border-b border-line">
@@ -143,35 +95,11 @@ function GenerationCard({ row, error }: { row: AM04Powerhouse; error: string }) 
       </div>
 
       <div className="p-5">
-        <div className="relative mx-auto w-full max-w-[240px] aspect-square">
-          <svg
-            viewBox="0 0 200 200"
-            className="w-full h-full -rotate-90"
-            role="img"
-            aria-label={`Total generation ${(totalKW / 1000).toFixed(1)} megawatts`}
-          >
-            <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="var(--color-surface-subtle)" strokeWidth={STROKE} />
-            {segments.map((seg, i) => (
-              <circle
-                key={i}
-                cx="100"
-                cy="100"
-                r={RADIUS}
-                fill="none"
-                stroke={seg.color}
-                strokeWidth={STROKE}
-                strokeDasharray={`${seg.dash} ${seg.rest}`}
-                strokeDashoffset={seg.offset}
-              />
-            ))}
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-ink tabular-nums leading-none">
-              {(totalKW / 1000).toFixed(1)}
-            </span>
-            <span className="mt-1 text-xs font-medium text-ink-secondary">MW total</span>
-          </div>
-        </div>
+        <Donut
+          segments={series.map((s) => ({ value: s.value, color: s.color }))}
+          hero={(totalKW / 1000).toFixed(1)}
+          sublabel="MW total"
+        />
       </div>
 
       <div className="px-4 pb-4">
@@ -197,9 +125,12 @@ function GenerationCard({ row, error }: { row: AM04Powerhouse; error: string }) 
 /* ── Steam card (biomass flow gauge) ─────────────────────────────── */
 
 function SteamCard({ row, error }: { row: AM04Powerhouse; error: string }) {
-  const flow = row.BIOMASS_STEAM_FLOW ?? 0
-  const pct = Math.min(Math.max((flow / STEAM_CAPACITY) * 100, 0), 100)
-  const dash = (pct / 100) * CIRC
+  const series = [
+    { label: 'Biomass', value: row.BIOMASS_STEAM_FLOW ?? 0 },
+    { label: 'GB Bosch', value: row.GB_BOSCH_STEAM ?? 0 },
+    { label: 'GB Robey', value: row.GB_ROBEY_STEAM ?? 0 },
+  ].map((s, i) => ({ ...s, color: STEAM_COLORS[i] }))
+  const total = series.reduce((acc, s) => acc + s.value, 0)
 
   return (
     <Card className="overflow-hidden">
@@ -221,30 +152,27 @@ function SteamCard({ row, error }: { row: AM04Powerhouse; error: string }) {
       </div>
 
       <div className="p-5">
-        <div className="relative mx-auto w-full max-w-[240px] aspect-square">
-          <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90" role="img" aria-label={`Steam flow ${flow.toFixed(1)} tons per hour`}>
-            <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="var(--color-surface-subtle)" strokeWidth={STROKE} />
-            <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="#5b82c9" strokeWidth={STROKE} strokeLinecap="round" strokeDasharray={`${dash} ${CIRC - dash}`} />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-3xl font-bold text-ink tabular-nums leading-none">{flow.toFixed(1)}</span>
-            <span className="mt-1 text-xs font-medium text-ink-secondary">T/H</span>
-          </div>
-        </div>
+        <Donut
+          segments={series.map((s) => ({ value: s.value, color: s.color }))}
+          hero={total.toFixed(1)}
+          sublabel="T/H total"
+        />
       </div>
 
       <div className="px-4 pb-4">
         <div className="divide-y divide-line">
-          <Link href="/dashboard/am4/steam" className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 py-2.5 group">
-            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: '#5b82c9' }} />
-            <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">Steam Power House</span>
-            <span className="text-sm font-medium text-ink tabular-nums">{flow.toFixed(1)} T/H</span>
-            <ChevronRight size={14} className="text-ink-muted" />
-          </Link>
+          {series.map((s) => (
+            <Link key={s.label} href="/dashboard/am4/steam" className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 py-2.5 group">
+              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+              <span className="text-sm text-ink-secondary group-hover:text-ink transition-colors">{s.label}</span>
+              <span className="text-sm font-medium text-ink tabular-nums">{s.value.toFixed(1)} T/H</span>
+              <ChevronRight size={14} className="text-ink-muted" />
+            </Link>
+          ))}
         </div>
         <div className="mt-3 flex items-center justify-between rounded-lg bg-brand text-brand-fg px-3 py-2.5">
           <span className="text-sm font-medium">Total Steam Generation</span>
-          <span className="text-sm font-semibold tabular-nums">{flow.toFixed(1)} T/H</span>
+          <span className="text-sm font-semibold tabular-nums">{total.toFixed(1)} T/H</span>
         </div>
       </div>
     </Card>

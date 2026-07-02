@@ -20,6 +20,13 @@ export const SITE_PERMISSIONS: Record<string, Role[]> = {
   am5:  ['admin', 'am5_user', 'multi_user', 'manager'],
   am14: ['admin', 'am14_user', 'manager'],
   am15: ['admin', 'am15_user', 'manager'],
+  // Newly grouped AMs (placeholder dashboards for now) — admin/manager only.
+  am2:   ['admin', 'manager'],
+  am_pq: ['admin', 'manager'],
+  am16:  ['admin', 'manager'],
+  am3:   ['admin', 'manager'],
+  am8:   ['admin', 'manager'],
+  am17:  ['admin', 'manager'],
 }
 
 // Which sites each role can see (overview cards + sidebar switcher)

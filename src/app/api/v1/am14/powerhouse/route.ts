@@ -1,16 +1,9 @@
-import { NextResponse } from "next/server";
-import { config } from "@/db/dbconfig";
-import sql from "mssql";
+import { respondJson } from '@/lib/api'
+import { query } from '@/db/query'
+import { config } from '@/db/dbconfig'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  try {
-    const pool = await sql.connect(config);
-    const result = await pool.request().query("SELECT * FROM AM14_POWERHOUSE");
-    return NextResponse.json({ data: result.recordset });
-  } catch (error) {
-    console.error("FULL SQL ERROR:", error);
-    return NextResponse.json({ error: "Failed to load powerhouse data" }, { status: 500 });
-  }
+  return respondJson(() => query('main', config, 'SELECT * FROM AM14_POWERHOUSE'), 'Failed to load powerhouse data')
 }

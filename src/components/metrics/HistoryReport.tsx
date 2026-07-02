@@ -232,6 +232,8 @@ export function HistoryReport({
     if (!Number.isFinite(idNum) || !idNum || rangeInvalid) return
 
     const abort = new AbortController()
+    let timedOut = false
+    const timeout = setTimeout(() => { timedOut = true; abort.abort() }, 30_000)
     const run = async () => {
       try {
         setLoading(true)
@@ -260,13 +262,18 @@ export function HistoryReport({
 
         setData(cleaned)
       } catch (e: unknown) {
-        if ((e as Error)?.name !== 'AbortError') setError((e as Error)?.message ?? 'Failed to fetch data')
+        if (timedOut) setError('Request timed out — the EMS server took too long to respond.')
+        else if ((e as Error)?.name !== 'AbortError') setError((e as Error)?.message ?? 'Failed to fetch data')
       } finally {
+        clearTimeout(timeout)
         setLoading(false)
       }
     }
     run()
-    return () => abort.abort()
+    return () => {
+      clearTimeout(timeout)
+      abort.abort()
+    }
   }, [idNum, startApi, endApi, chosenTimeStep, rangeInvalid])
 
   const totalUsed = useMemo(

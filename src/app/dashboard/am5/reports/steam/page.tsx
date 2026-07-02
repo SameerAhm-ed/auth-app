@@ -227,19 +227,23 @@ export default function SteamGenerationReport() {
     ]
     const body: QueryBody = { valueIds, timeBegin: toApiTime(start), timeEnd: toApiTime(end), timeStep: '3600,1' }
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         cache: 'no-store',
+        signal: controller.signal,
         body: JSON.stringify(body),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json: TagRecord[] = await res.json()
       setData(json ?? [])
     } catch (e: unknown) {
-      setErr((e as Error)?.message || 'Failed to fetch')
+      setErr(controller.signal.aborted ? 'Request timed out — the EMS server took too long to respond.' : (e as Error)?.message || 'Failed to fetch')
     } finally {
+      clearTimeout(timeout)
       setLoading(false)
     }
   }

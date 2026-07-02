@@ -1,16 +1,15 @@
 import Link from 'next/link'
 import { BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { Gauge } from './Gauge'
 import type { Status, Fuel } from './status'
-
-const R = 54
-const SW = 12
-const C = 2 * Math.PI * R
 
 export interface MetricCardProps {
   label: string
   value: number
   unit?: string
+  /** Optional leading icon shown before the label (e.g. Sun, Flame). */
+  icon?: React.ReactNode
   /** When set, renders a capacity gauge (value / capacity %). */
   capacity?: number
   status?: Status
@@ -31,6 +30,7 @@ export function MetricCard({
   label,
   value,
   unit = 'kW',
+  icon,
   capacity,
   status,
   fuel,
@@ -41,12 +41,12 @@ export function MetricCard({
   const hasGauge = capacity != null
   const pct = hasGauge && capacity! > 0 ? Math.min(Math.max((value / capacity!) * 100, 0), 100) : 0
   const ringColor = gaugeColor ?? status?.color ?? '#5b82c9'
-  const dash = (pct / 100) * C
 
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2 min-w-0">
+          {icon}
           <h3 className="text-sm font-semibold text-ink truncate">{label}</h3>
           {fuel && (
             <span
@@ -77,31 +77,7 @@ export function MetricCard({
       </div>
 
       <div className="flex items-center gap-4">
-        {hasGauge && (
-          <div className="relative w-24 h-24 shrink-0">
-            <svg
-              viewBox="0 0 120 120"
-              className="w-full h-full -rotate-90"
-              role="img"
-              aria-label={`${label}: ${Math.round(pct)}% of capacity`}
-            >
-              <circle cx="60" cy="60" r={R} fill="none" stroke="var(--color-surface-subtle)" strokeWidth={SW} />
-              <circle
-                cx="60"
-                cy="60"
-                r={R}
-                fill="none"
-                stroke={ringColor}
-                strokeWidth={SW}
-                strokeLinecap="round"
-                strokeDasharray={`${dash} ${C - dash}`}
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-sm font-bold text-ink tabular-nums">
-              {Math.round(pct)}%
-            </div>
-          </div>
-        )}
+        {hasGauge && <Gauge pct={pct} color={ringColor} ariaLabel={`${label}: ${Math.round(pct)}% of capacity`} />}
 
         <div className="min-w-0">
           <p className="text-2xl font-bold text-ink tabular-nums leading-none">

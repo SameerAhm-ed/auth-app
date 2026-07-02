@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Zap, ArrowRight, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
+import { Donut } from '@/components/metrics/Donut'
+import { useLiveData } from '@/components/metrics/useLiveData'
 
 interface AM14Powerhouse {
   id: number
@@ -25,52 +26,8 @@ const SERIES: { key: keyof AM14Powerhouse; label: string; color: string }[] = [
 
 const fmtMW = (kw: number) => (kw / 1000).toFixed(2)
 
-// ── SVG donut geometry ──
-const RADIUS = 80
-const STROKE = 40 // gives a ~60% cutout
-const CIRC = 2 * Math.PI * RADIUS
-const GAP = 10 // visual spacing between segments (in path units)
-
-async function getData() {
-  const res = await fetch('/api/v1/am14/powerhouse', {
-    method: 'GET',
-    cache: 'no-store',
-    headers: { 'Content-Type': 'application/json' },
-  })
-  if (!res.ok) throw new Error('Failed to fetch data')
-  return res.json()
-}
-
 export default function AM14DashboardPage() {
-  const [data, setData] = useState<AM14Powerhouse[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  // Poll the API every second; keep the last good values if a tick fails.
-  useEffect(() => {
-    let cancelled = false
-
-    const refresh = async () => {
-      try {
-        const result = await getData()
-        if (!cancelled && result?.data) {
-          setData(result.data)
-          setError('')
-        }
-      } catch {
-        if (!cancelled) setError('Failed to load dashboard')
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-
-    refresh()
-    const id = setInterval(refresh, 1000)
-    return () => {
-      cancelled = true
-      clearInterval(id)
-    }
-  }, [])
+  const { data, loading, error } = useLiveData<AM14Powerhouse>('/api/v1/am14/powerhouse', 1000, 'Failed to load dashboard')
 
   // Aggregate each series across all rows (handles 1+ snapshot rows).
   const totals = SERIES.map((s) => ({
@@ -78,14 +35,6 @@ export default function AM14DashboardPage() {
     value: data.reduce((acc, row) => acc + (row[s.key] ?? 0), 0),
   }))
   const totalKW = totals.reduce((acc, t) => acc + t.value, 0)
-
-  // Build donut segments (pure: each segment's offset is the sum of prior arcs).
-  const arcFor = (value: number) => (totalKW > 0 ? (value / totalKW) * CIRC : 0)
-  const segments = totals.map((t, i) => {
-    const priorArc = totals.slice(0, i).reduce((acc, p) => acc + arcFor(p.value), 0)
-    const dash = Math.max(arcFor(t.value) - GAP, 0)
-    return { color: t.color, dash, rest: CIRC - dash, offset: -priorArc }
-  })
 
   return (
     <div className="space-y-6">
@@ -135,38 +84,11 @@ export default function AM14DashboardPage() {
 
             {/* Donut */}
             <div className="p-5">
-              <div className="relative mx-auto w-full max-w-[240px] aspect-square">
-                <svg
-                  viewBox="0 0 200 200"
-                  className="w-full h-full -rotate-90"
-                  role="img"
-                  aria-label={`Total power generation ${(totalKW / 1000).toFixed(1)} megawatts across ${totals.length} sources`}
-                >
-                  {/* Track */}
-                  <circle cx="100" cy="100" r={RADIUS} fill="none" stroke="var(--color-surface-subtle)" strokeWidth={STROKE} />
-                  {/* Segments */}
-                  {segments.map((seg, i) => (
-                    <circle
-                      key={i}
-                      cx="100"
-                      cy="100"
-                      r={RADIUS}
-                      fill="none"
-                      stroke={seg.color}
-                      strokeWidth={STROKE}
-                      strokeDasharray={`${seg.dash} ${seg.rest}`}
-                      strokeDashoffset={seg.offset}
-                    />
-                  ))}
-                </svg>
-                {/* Centered hero total */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-3xl font-bold text-ink tabular-nums leading-none">
-                    {(totalKW / 1000).toFixed(1)}
-                  </span>
-                  <span className="mt-1 text-xs font-medium text-ink-secondary">MW total</span>
-                </div>
-              </div>
+              <Donut
+                segments={totals.map((t) => ({ value: t.value, color: t.color }))}
+                hero={(totalKW / 1000).toFixed(1)}
+                sublabel="MW total"
+              />
             </div>
 
             {/* Legend */}

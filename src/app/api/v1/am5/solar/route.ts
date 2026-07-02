@@ -1,16 +1,9 @@
-import { NextResponse } from "next/server";
-import { configAM5 } from "@/db/dbconfig";
-import { getPool } from "@/db/pools";
+import { respondJson } from '@/lib/api'
+import { query } from '@/db/query'
+import { configAM5 } from '@/db/dbconfig'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  try {
-    const pool = await getPool("am5", configAM5);
-    const result = await pool.request().query("SELECT * FROM Solar");
-    return NextResponse.json({ data: result.recordset });
-  } catch (error) {
-    console.error("FULL SQL ERROR:", error);
-    return NextResponse.json({ error: "Failed to load data" }, { status: 500 });
-  }
+  return respondJson(() => query('am5', configAM5, 'SELECT * FROM Solar'))
 }

@@ -1,66 +1,58 @@
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
-import { ROLE_SITES } from '@/lib/constants'
-import { Card } from '@/components/ui/Card'
-import { buttonVariants } from '@/components/ui/Button'
-
-const SITE_LABELS: Record<string, string> = {
-  am4:  'AM4',
-  am5:  'AM5',
-  am14: 'AM14',
-  am15: 'AM15',
-}
+import { ChevronRight } from 'lucide-react'
+import { SITE_PERMISSIONS, type Role } from '@/lib/constants'
+import { DASHBOARD_CATEGORIES } from '@/lib/dashboardCategories'
 
 export default async function OverviewPage() {
   const headersList = await headers()
   const name = headersList.get('x-user-name') || 'User'
-  const role = headersList.get('x-user-role') || 'am4_user'
+  const role = (headersList.get('x-user-role') || 'am4_user') as Role
 
-  const allowedSites = ROLE_SITES[role] || []
+  const canAccess = (id: string) => SITE_PERMISSIONS[id]?.includes(role) ?? false
+
+  // Keep only the AMs this role can access; drop categories left empty.
+  const categories = DASHBOARD_CATEGORIES.map((c) => ({
+    ...c,
+    ams: c.ams.filter((am) => canAccess(am.id)),
+  })).filter((c) => c.ams.length > 0)
 
   return (
-    <main id="main-content" tabIndex={-1} className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-      {/* Page header */}
+    <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-ink mb-1">Welcome, {name}</h1>
-        <p className="text-sm text-ink-secondary">Select a site to view its dashboard.</p>
+        <p className="text-sm text-ink-secondary">Select a mill to view its dashboard.</p>
       </div>
 
-      {/* Site cards — identical styling across every site */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {allowedSites.map((site) => {
-          const label = SITE_LABELS[site] || site.toUpperCase()
-          return (
-            <Card key={site} className="p-6 flex flex-col gap-5">
-              {/* Site identity */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-surface-subtle flex items-center justify-center">
-                  <span className="text-sm font-bold text-ink">{label}</span>
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-ink">{label}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand" />
-                    <span className="text-xs text-ink-secondary">Online</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Open button */}
-              <Link href={`/dashboard/${site}`} className={buttonVariants({ variant: 'primary', fullWidth: true })}>
-                Open
-                <ArrowRight size={15} />
-              </Link>
-            </Card>
-          )
-        })}
-      </div>
-
-      {/* Empty state */}
-      {allowedSites.length === 0 && (
+      {categories.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-ink-secondary text-sm">No sites assigned to your account. Contact your administrator.</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {categories.map((category) => (
+            <section key={category.name}>
+              <h2 className="text-xs font-semibold text-ink-muted uppercase tracking-wider mb-3">{category.name}</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {category.ams.map((am) => (
+                  <Link
+                    key={am.id}
+                    href={`/dashboard/${am.id}`}
+                    className="group flex items-center justify-between gap-3 rounded-xl border border-line bg-surface px-4 py-3 hover:border-line-strong hover:bg-canvas transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-ink truncate">{am.label}</p>
+                      <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-ink-secondary">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand" aria-hidden="true" />
+                        Online
+                      </span>
+                    </div>
+                    <ChevronRight size={16} className="shrink-0 text-ink-muted group-hover:text-ink transition-colors" aria-hidden="true" />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
       )}
     </main>
