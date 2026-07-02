@@ -2,22 +2,32 @@
 // edit this list only — the overview UI and routing derive from it.
 //   id    → route slug (/dashboard/<id>) and permission key (see SITE_PERMISSIONS)
 //   label → display name
+//   live  → true = instrumented (green "Online"); omit for placeholders ("Coming soon")
+//   icon  → category icon key (resolved to a lucide icon in DashboardGrid)
 export interface DashboardAM {
   id: string
   label: string
+  live?: boolean
 }
 export interface DashboardCategory {
   name: string
+  icon: string
   ams: DashboardAM[]
 }
 
 export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
   {
     name: 'Razzakabad',
-    ams: [{ id: 'am5', label: 'AM5' }],
+    icon: 'map-pin',
+    ams: [
+      { id: 'am5', label: 'AM5', live: true },
+      { id: 'am17', label: 'AM17' },
+      { id: 'am8', label: 'AM8' },
+    ],
   },
   {
     name: 'Denim',
+    icon: 'shirt',
     ams: [
       { id: 'am2', label: 'AM2' },
       { id: 'am_pq', label: 'AM PQ' },
@@ -26,18 +36,16 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
   },
   {
     name: 'Garments',
+    icon: 'factory',
     ams: [
-      { id: 'am4', label: 'AM4' },
-      { id: 'am14', label: 'AM14' },
-      { id: 'am15', label: 'AM15' },
+      { id: 'am4', label: 'AM4', live: true },
+      { id: 'am14', label: 'AM14', live: true },
+      { id: 'am15', label: 'AM15', live: true },
     ],
   },
   {
     name: 'Spinning',
-    ams: [
-      { id: 'am3', label: 'AM3' },
-      { id: 'am8', label: 'AM8' },
-      { id: 'am17', label: 'AM17' },
-    ],
+    icon: 'layers',
+    ams: [{ id: 'am3', label: 'AM3' }],
   },
 ]
