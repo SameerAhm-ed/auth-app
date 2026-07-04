@@ -22,13 +22,9 @@ interface DashboardRow {
   cb: number
   new_cb: number
   ngas_psi: number
-  ngas_mbar: number
   rlng_psi: number
-  rlng_mbar: number
   fgc: number
-  fgc_mbar: number
   industrialgas_psi: number
-  industrialgas_mbar: number
   steam_pressure_mainheader_1: number
   steam_pressure_mainheader_2_and_3: number
   steam_pressure_mainheader_4: number
@@ -248,17 +244,15 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
         <CardHead icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />} title="Gas Pressures" />
         <div className="px-4 py-2 divide-y divide-line">
           {[
-            { label: 'Capacitive', psi: row.ngas_psi, mbar: row.ngas_mbar },
-            { label: 'Industrial', psi: row.industrialgas_psi, mbar: row.industrialgas_mbar },
-            { label: 'RLNG', psi: row.rlng_psi, mbar: row.rlng_mbar },
-            { label: 'FGC', psi: row.fgc, mbar: row.fgc_mbar, mbarUnit: 'BAR' },
+            { label: 'Capacitive', psi: row.ngas_psi },
+            { label: 'Industrial', psi: row.industrialgas_psi },
+            { label: 'RLNG', psi: row.rlng_psi },
+            { label: 'FGC', psi: row.fgc },
           ].map((g) => (
             <div key={g.label} className="flex items-center justify-between py-3 text-sm">
               <span className="text-ink-secondary">{g.label}</span>
               <span className="tabular-nums text-ink font-medium">
                 {g.psi} <span className="text-ink-muted font-normal">PSI</span>
-                <span className="mx-1.5 text-line-strong">·</span>
-                {g.mbar} <span className="text-ink-muted font-normal">{g.mbarUnit ?? 'mBAR'}</span>
               </span>
             </div>
           ))}
