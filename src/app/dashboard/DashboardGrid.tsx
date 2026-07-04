@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Zap, Flame, Factory, MapPin, Shirt, Layers, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
-import type { DashboardCategory } from '@/lib/dashboardCategories'
+import { categoryAms, type DashboardAM, type DashboardCategory, type DashboardSubgroup } from '@/lib/dashboardCategories'
 
 type AmTotal = { power: number; steam: number }
 type Summary = Record<string, AmTotal>
@@ -65,7 +65,7 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
     }
   }, [])
 
-  const allAms = categories.flatMap((c) => c.ams)
+  const allAms = categories.flatMap(categoryAms)
   const onlineCount = allAms.filter((a) => a.live).length
   let plantPower = 0
   let plantSteam = 0
@@ -90,10 +90,11 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
       <div className="space-y-4">
         {categories.map((category) => {
           const Icon = CATEGORY_ICONS[category.icon] ?? Factory
+          const mills = categoryAms(category)
           let power = 0
           let steam = 0
           let hasData = false
-          for (const am of category.ams) {
+          for (const am of mills) {
             const t = summary[am.id]
             if (t) {
               power += t.power
@@ -101,7 +102,7 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
               hasData = true
             }
           }
-          const liveCount = category.ams.filter((a) => a.live).length
+          const liveCount = mills.filter((a) => a.live).length
 
           return (
             <Card key={category.name} className="p-4 sm:p-5">
@@ -113,7 +114,7 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
                   <div className="min-w-0">
                     <p className="text-base font-semibold text-ink truncate">{category.name}</p>
                     <p className="text-xs text-ink-muted">
-                      {category.ams.length} {category.ams.length === 1 ? 'mill' : 'mills'}
+                      {mills.length} {mills.length === 1 ? 'mill' : 'mills'}
                     </p>
                   </div>
                 </div>
@@ -128,59 +129,128 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
                 ) : null}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {category.ams.map((am) => {
-                  const t = summary[am.id]
-                  return (
-                    <Link
-                      key={am.id}
-                      href={`/dashboard/${am.id}`}
-                      className="group flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 hover:border-line-strong hover:bg-canvas transition-colors"
-                    >
-                      <span
-                        className={`w-8 h-8 rounded-lg bg-surface-subtle text-xs font-semibold flex items-center justify-center shrink-0 ${am.live ? 'text-ink' : 'text-ink-muted'}`}
-                      >
-                        {monogram(am.label)}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-ink truncate">{am.label}</span>
-                        {am.live ? (
-                          <>
-                            <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ONLINE }} aria-hidden="true" />
-                              Online
-                            </span>
-                            {t ? (
-                              <span className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-secondary tabular-nums">
-                                <span className="inline-flex items-center gap-1">
-                                  <Zap size={12} className="text-ink-muted" aria-hidden="true" />
-                                  <span className="font-semibold text-ink">{fmtMW(t.power)}</span> MW
-                                </span>
-                                <span className="text-line-strong">·</span>
-                                <span className="inline-flex items-center gap-1">
-                                  <Flame size={12} className="text-ink-muted" aria-hidden="true" />
-                                  <span className="font-semibold text-ink">{fmtTH(t.steam)}</span> T/H
-                                </span>
-                              </span>
-                            ) : null}
-                          </>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-ink-muted)' }} aria-hidden="true" />
-                            Coming soon
-                          </span>
-                        )}
-                      </span>
-                      <ChevronRight size={16} className="shrink-0 text-ink-muted group-hover:text-ink transition-colors" aria-hidden="true" />
-                    </Link>
-                  )
-                })}
+              {/* Subgroups (recessed clusters), then direct mills */}
+              <div className="space-y-4">
+                {category.subgroups?.map((group) => (
+                  <SubgroupPanel key={group.name} group={group} summary={summary} />
+                ))}
+
+                {category.ams.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {category.ams.map((am) => (
+                      <MillTile key={am.id} am={am} total={summary[am.id]} />
+                    ))}
+                  </div>
+                )}
               </div>
             </Card>
           )
         })}
       </div>
     </div>
+  )
+}
+
+function SubgroupPanel({ group, summary }: { group: DashboardSubgroup; summary: Summary }) {
+  let power = 0
+  let steam = 0
+  let hasData = false
+  for (const am of group.ams) {
+    const t = summary[am.id]
+    if (t) { power += t.power; steam += t.steam; hasData = true }
+  }
+
+  const headerInner = (
+    <>
+      <span className="flex items-center gap-2.5 min-w-0">
+        <span className="w-7 h-7 rounded-lg bg-surface border border-line text-ink-secondary flex items-center justify-center shrink-0">
+          <MapPin size={14} />
+        </span>
+        <span className="min-w-0">
+          <span className="flex items-center gap-1 text-sm font-semibold text-ink">
+            <span className="truncate">{group.name}</span>
+            {group.id && (
+              <ChevronRight size={14} className="shrink-0 text-ink-muted group-hover:text-ink group-hover:translate-x-0.5 transition-all" aria-hidden="true" />
+            )}
+          </span>
+          <span className="block text-[11px] text-ink-muted">
+            {group.ams.length} {group.ams.length === 1 ? 'mill' : 'mills'}
+          </span>
+        </span>
+      </span>
+      {hasData && (
+        <span className="flex items-center gap-2 shrink-0">
+          <StatChip icon={Zap} value={fmtMW(power)} unit="MW" />
+          <StatChip icon={Flame} value={fmtTH(steam)} unit="T/H" />
+        </span>
+      )}
+    </>
+  )
+
+  return (
+    <div className="rounded-xl border border-line bg-canvas p-3">
+      {group.id ? (
+        <Link
+          href={`/dashboard/${group.id}`}
+          className="group flex items-center justify-between gap-3 flex-wrap rounded-lg px-1 py-1 mb-3 -mx-1 hover:bg-surface-subtle transition-colors"
+        >
+          {headerInner}
+        </Link>
+      ) : (
+        <div className="flex items-center justify-between gap-3 flex-wrap px-1 py-1 mb-3">{headerInner}</div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {group.ams.map((am) => (
+          <MillTile key={am.id} am={am} total={summary[am.id]} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MillTile({ am, total }: { am: DashboardAM; total?: AmTotal }) {
+  return (
+    <Link
+      href={`/dashboard/${am.id}`}
+      className="group flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 hover:border-line-strong hover:bg-canvas transition-colors"
+    >
+      <span
+        className={`w-8 h-8 rounded-lg bg-surface-subtle text-xs font-semibold flex items-center justify-center shrink-0 ${am.live ? 'text-ink' : 'text-ink-muted'}`}
+      >
+        {monogram(am.label)}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-ink truncate">{am.label}</span>
+        {am.live ? (
+          <>
+            <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ONLINE }} aria-hidden="true" />
+              Online
+            </span>
+            {total ? (
+              <span className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-secondary tabular-nums">
+                <span className="inline-flex items-center gap-1">
+                  <Zap size={12} className="text-ink-muted" aria-hidden="true" />
+                  <span className="font-semibold text-ink">{fmtMW(total.power)}</span> MW
+                </span>
+                <span className="text-line-strong">·</span>
+                <span className="inline-flex items-center gap-1">
+                  <Flame size={12} className="text-ink-muted" aria-hidden="true" />
+                  <span className="font-semibold text-ink">{fmtTH(total.steam)}</span> T/H
+                </span>
+              </span>
+            ) : null}
+          </>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-ink-muted)' }} aria-hidden="true" />
+            Coming soon
+          </span>
+        )}
+      </span>
+      <ChevronRight size={16} className="shrink-0 text-ink-muted group-hover:text-ink transition-colors" aria-hidden="true" />
+    </Link>
   )
 }
 

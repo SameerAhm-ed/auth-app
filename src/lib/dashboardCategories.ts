@@ -9,29 +9,45 @@ export interface DashboardAM {
   label: string
   live?: boolean
 }
+// A named cluster of mills within a category (e.g. a site/location).
+// `id` → the cluster has its own dashboard at /dashboard/<id> (clickable header).
+export interface DashboardSubgroup {
+  id?: string
+  name: string
+  ams: DashboardAM[]
+}
 export interface DashboardCategory {
   name: string
   icon: string
-  ams: DashboardAM[]
+  subgroups?: DashboardSubgroup[] // labeled clusters, rendered above direct mills
+  ams: DashboardAM[]              // mills that sit directly under the category
+}
+
+// All mills in a category, subgroups first — for totals, counts, live checks.
+export function categoryAms(c: DashboardCategory): DashboardAM[] {
+  return [...(c.subgroups?.flatMap((g) => g.ams) ?? []), ...c.ams]
 }
 
 export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
   {
-    name: 'Razzakabad',
-    icon: 'map-pin',
-    ams: [
-      { id: 'am5', label: 'AM5', live: true },
-      { id: 'am17', label: 'AM17', live: true },
-      { id: 'am8', label: 'AM8', live: true },
-    ],
-  },
-  {
-    name: 'Denim',
+    name: 'Denim & Spinning',
     icon: 'shirt',
+    subgroups: [
+      {
+        id: 'razzakabad',
+        name: 'Razzakabad',
+        ams: [
+          { id: 'am5', label: 'AM5', live: true },
+          { id: 'am8', label: 'AM8', live: true },
+          { id: 'am17', label: 'AM17', live: true },
+        ],
+      },
+    ],
     ams: [
       { id: 'am2', label: 'AM2' },
-      { id: 'am_pq', label: 'AM PQ' },
+      { id: 'am3', label: 'AM3' },
       { id: 'am16', label: 'AM16' },
+      { id: 'am_pq', label: 'AM PQ' },
     ],
   },
   {
@@ -42,10 +58,5 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
       { id: 'am14', label: 'AM14', live: true },
       { id: 'am15', label: 'AM15', live: true },
     ],
-  },
-  {
-    name: 'Spinning',
-    icon: 'layers',
-    ams: [{ id: 'am3', label: 'AM3' }],
   },
 ]

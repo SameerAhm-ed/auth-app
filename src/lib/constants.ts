@@ -27,6 +27,7 @@ export const SITE_PERMISSIONS: Record<string, Role[]> = {
   am3:   ['admin', 'manager'],
   am8:   ['admin', 'manager'],
   am17:  ['admin', 'manager'],
+  razzakabad: ['admin', 'manager'],
 }
 
 // Which sites each role can see (overview cards + sidebar switcher)
