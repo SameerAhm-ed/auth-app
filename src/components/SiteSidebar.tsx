@@ -19,6 +19,7 @@ const SITE_META: Record<string, { label: string }> = {
   am14: { label: 'AM14' },
   am15: { label: 'AM15' },
   am17: { label: 'AM17' },
+  am8:  { label: 'AM8'  },
 }
 
 const NAV_ITEMS = [
@@ -78,6 +79,8 @@ const SITE_NAV: Record<string, NavGroup[]> = {
     },
     { items: [{ label: 'Solar', path: '/solar', icon: Sun }] },
   ],
+  // AM8 is a single solar + utilization view — only the overview link.
+  am8: [{ items: [{ label: 'Dashboard', path: '', icon: LayoutDashboard }] }],
 }
 
 // Grouped nav for a site: custom if defined, else the default flat list.

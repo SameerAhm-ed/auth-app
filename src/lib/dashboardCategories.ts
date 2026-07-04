@@ -22,7 +22,7 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     ams: [
       { id: 'am5', label: 'AM5', live: true },
       { id: 'am17', label: 'AM17' },
-      { id: 'am8', label: 'AM8' },
+      { id: 'am8', label: 'AM8', live: true },
     ],
   },
   {
