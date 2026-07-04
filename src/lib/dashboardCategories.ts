@@ -21,7 +21,7 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     icon: 'map-pin',
     ams: [
       { id: 'am5', label: 'AM5', live: true },
-      { id: 'am17', label: 'AM17' },
+      { id: 'am17', label: 'AM17', live: true },
       { id: 'am8', label: 'AM8', live: true },
     ],
   },
