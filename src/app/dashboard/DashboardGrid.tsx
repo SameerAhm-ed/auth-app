@@ -129,34 +129,52 @@ export function DashboardGrid({ categories }: { categories: DashboardCategory[] 
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {category.ams.map((am) => (
-                  <Link
-                    key={am.id}
-                    href={`/dashboard/${am.id}`}
-                    className="group flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 hover:border-line-strong hover:bg-canvas transition-colors"
-                  >
-                    <span
-                      className={`w-8 h-8 rounded-lg bg-surface-subtle text-xs font-semibold flex items-center justify-center shrink-0 ${am.live ? 'text-ink' : 'text-ink-muted'}`}
+                {category.ams.map((am) => {
+                  const t = summary[am.id]
+                  return (
+                    <Link
+                      key={am.id}
+                      href={`/dashboard/${am.id}`}
+                      className="group flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-2.5 hover:border-line-strong hover:bg-canvas transition-colors"
                     >
-                      {monogram(am.label)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-ink truncate">{am.label}</span>
-                      {am.live ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ONLINE }} aria-hidden="true" />
-                          Online
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-ink-muted)' }} aria-hidden="true" />
-                          Coming soon
-                        </span>
-                      )}
-                    </span>
-                    <ChevronRight size={16} className="shrink-0 text-ink-muted group-hover:text-ink transition-colors" aria-hidden="true" />
-                  </Link>
-                ))}
+                      <span
+                        className={`w-8 h-8 rounded-lg bg-surface-subtle text-xs font-semibold flex items-center justify-center shrink-0 ${am.live ? 'text-ink' : 'text-ink-muted'}`}
+                      >
+                        {monogram(am.label)}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-semibold text-ink truncate">{am.label}</span>
+                        {am.live ? (
+                          <>
+                            <span className="inline-flex items-center gap-1.5 text-xs text-ink-secondary">
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: ONLINE }} aria-hidden="true" />
+                              Online
+                            </span>
+                            {t ? (
+                              <span className="mt-0.5 flex items-center gap-1.5 text-xs text-ink-secondary tabular-nums">
+                                <span className="inline-flex items-center gap-1">
+                                  <Zap size={12} className="text-ink-muted" aria-hidden="true" />
+                                  <span className="font-semibold text-ink">{fmtMW(t.power)}</span> MW
+                                </span>
+                                <span className="text-line-strong">·</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Flame size={12} className="text-ink-muted" aria-hidden="true" />
+                                  <span className="font-semibold text-ink">{fmtTH(t.steam)}</span> T/H
+                                </span>
+                              </span>
+                            ) : null}
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-xs text-ink-muted">
+                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-ink-muted)' }} aria-hidden="true" />
+                            Coming soon
+                          </span>
+                        )}
+                      </span>
+                      <ChevronRight size={16} className="shrink-0 text-ink-muted group-hover:text-ink transition-colors" aria-hidden="true" />
+                    </Link>
+                  )
+                })}
               </div>
             </Card>
           )
