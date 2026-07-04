@@ -18,6 +18,7 @@ const SITE_META: Record<string, { label: string }> = {
   am5:  { label: 'AM5'  },
   am14: { label: 'AM14' },
   am15: { label: 'AM15' },
+  am17: { label: 'AM17' },
 }
 
 const NAV_ITEMS = [
@@ -62,6 +63,17 @@ const SITE_NAV: Record<string, NavGroup[]> = {
         { label: 'Steam PH 4', path: '/steamph4', icon: Flame },
         { label: 'Coal Boiler 1', path: '/coalboiler1', icon: Flame },
         { label: 'Coal Boiler 2', path: '/coalboiler2', icon: Flame },
+      ],
+    },
+    { items: [{ label: 'Solar', path: '/solar', icon: Sun }] },
+  ],
+  am17: [
+    { items: [{ label: 'Dashboard', path: '', icon: LayoutDashboard }] },
+    {
+      heading: 'Power Houses',
+      items: [
+        { label: 'Power House 1', path: '/powerhouse3', icon: Factory },
+        { label: 'Power House 2', path: '/powerhouse4', icon: Factory },
       ],
     },
     { items: [{ label: 'Solar', path: '/solar', icon: Sun }] },
