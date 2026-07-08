@@ -58,6 +58,46 @@ React 19, Tailwind CSS v4, MSSQL (`mssql`). Deployed on Vercel and working.
 - **Renamed** everywhere → display "Artistic Milliners Dashboard", short "EMS",
   package `artistic-ems`.
 
+## Session handoff — current state (read this first)
+
+**What the app is:** real-time captive power + steam monitoring for Artistic Milliners
+(textile group, Karachi). Live values come from **two MSSQL DBs** written every second by a
+local plant backend (current-snapshot tables, NOT history — so DB durability is low-stakes;
+it self-heals). **Historical** data comes from the external EMS via `proxy-query`
+(`http://ems.am5pearl.com:5000`). Prod target: **24/7, 30+ concurrent users**. MSSQL is a
+**free internet-hosted tier** (connection-capped, no SLA, `encrypt: false` = cleartext — must fix).
+
+**Gotcha (documented in AGENTS.md):** modified Next 16 build — route handlers MUST be
+`export async function GET()`; `export const GET = ...` silently 404s at runtime.
+
+**Done this session (all builds green — tsc/eslint/next build):**
+- **API refactor**: routes → `respondJson` (`src/lib/api.ts`) + typed pooled `query`
+  (`src/db/query.ts`) via `getPool`; AM4/14/15 now use `getPool('main', config)`.
+- **Dedup**: shared `Gauge`; AM4/14/15 pages migrated onto `MetricCard`/`useLiveData`/`MetricStates`;
+  `useLiveData` hardened (abort + pause-on-hidden + non-overlap + keep-last-good); 30s timeouts on report fetches.
+- **AM4**: solar relabeled (SOLAR AM4 / AM4 B / AM4C T2); GB Robey steam wired; overview steam multi-source on shared `Donut`;
+  **KE regrouped** into KE 4A (sanction 4800; KE 4A 1=3000/KE_1, 4A 2=2500/KE_2, 4A 3=750 placeholder) + KE 4C (sanction 4975; 4C 1=2500/KE_3, 4C 2=2500 placeholder), per-engine donut vs rated capacity + group sanction/running totals.
+- **Dashboard overview redesigned** → categorized admin panel. Data-driven config
+  `src/lib/dashboardCategories.ts` (per-AM `live` flag, category `icon`); client `DashboardGrid.tsx`
+  polls **`/api/v1/summary`** (new: per-AM live Power kW + Steam T/H) and shows plant summary strip +
+  per-category combined Power/Steam + monogram tiles (green Online / muted Coming soon).
+  Categories: **Razzakabad** (AM5, AM17, AM8) · **Denim** (AM2, AM PQ, AM16) · **Garments** (AM4, AM14, AM15) · **Spinning** (AM3).
+  New AMs gated admin/manager in `SITE_PERMISSIONS`; 6 placeholder pages via `src/components/ComingSoon.tsx` (AM PQ slug = `am_pq`).
+
+**Placeholders / partial:** 6 placeholder AM dashboards; AM14 steam/solar stubs; AM4/14/15 historical reports are "coming soon"; most AM5 engine report tags not set; AM4/AM15 overview report bar-icons are unwired `<button>`s (TODO); status is config-driven, not real-time.
+
+**🔴 Open blockers (unchanged, urgent for prod):** (1) `/api/v1/*` unauthenticated incl. `/api/v1/summary` + `proxy-query` open relay; (2) DB `encrypt:false`; (3) in-memory users; (4) `JWT_SECRET` hardcoded fallback; (5) open self-registration; (6) 1s polling (now also `/api/v1/summary` = 4 queries/sec) — needs **poller + Redis** (collapses N readers → 1; the key fix for 30+ users on a free DB).
+
+**Deployment plan (agreed):** move to **managed MSSQL (Azure SQL)** + **Azure Container Apps** + **Azure Cache for Redis**, container (`output: 'standalone'` — verify on this build), GH Actions CI/CD (one image → staging → manual prod), health endpoints, monitoring (alert on DB connections + poller staleness first). DB durability low priority (ephemeral data); availability + TLS + connection-fanout are the real concerns.
+
+**Next big direction — turn monitoring into an EMS (for management/boss demo):** build on a
+**shared monthly Tariff module** (rates change monthly; replace the steam report's localStorage
+prices) → **live Cost (PKR) + Carbon/solar%** on overview + **control-room wallboard/TV mode** →
+**alerts** (FAULT / mill-offline / running-expensive-source via WhatsApp+email+in-app) →
+**production ingest → Specific Energy Consumption** (energy & Rs per kg/meter — the standout metric) →
+**targets + mill league table + auto PDF** (replace their Excel). Sequence: Tariff+Cost/Carbon → Wallboard → Alerts → SEC → Targets/Reports.
+Open Qs for user: production units/source per mill, KE tariff structure (flat vs peak/off-peak), ESG standard (Higg/ISO 50001?).
+
 ## Open / optional (not started)
 
 - **DB-backed user authentication & authorization** — *planned, do NOT implement until

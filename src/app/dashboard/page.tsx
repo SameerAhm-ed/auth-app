@@ -20,18 +20,13 @@ export default async function OverviewPage() {
   })).filter((c) => c.ams.length > 0 || c.subgroups.length > 0)
 
   return (
-    <main id="main-content" tabIndex={-1} className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-ink mb-1">Welcome, {name}</h1>
-        <p className="text-sm text-ink-secondary">Select a mill to view its dashboard.</p>
-      </div>
-
+    <main id="main-content" tabIndex={-1} className="max-w-2xl lg:max-w-4xl mx-auto px-4 sm:px-6 py-5 pb-[max(3rem,env(safe-area-inset-bottom))]">
       {categories.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-ink-secondary text-sm">No sites assigned to your account. Contact your administrator.</p>
         </div>
       ) : (
-        <DashboardGrid categories={categories} />
+        <DashboardGrid categories={categories} name={name} />
       )}
     </main>
   )
