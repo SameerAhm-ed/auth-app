@@ -32,6 +32,8 @@ export function BoilerPage({
   endpoint,
   boilers,
   report,
+  backHref = '/dashboard/am5',
+  backLabel = 'AM5 overview',
 }: {
   title: string
   subtitle?: string
@@ -39,6 +41,9 @@ export function BoilerPage({
   boilers: BoilerCfg[]
   /** Report-link context. Each boiler with a `tag` links to its historical report. */
   report?: { back: string; backLabel: string; unit?: string }
+  /** Overview back-link target + label (defaults to the AM5 overview). */
+  backHref?: string
+  backLabel?: string
 }) {
   const { data, loading, error } = useLiveData<Row>(endpoint)
   const row = data[0]
@@ -46,9 +51,9 @@ export function BoilerPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard/am5" className="inline-flex items-center gap-1 text-sm text-ink-secondary hover:text-ink transition-colors mb-2">
+        <Link href={backHref} className="inline-flex items-center gap-1 text-sm text-ink-secondary hover:text-ink transition-colors mb-2">
           <ChevronLeft size={15} />
-          AM5 overview
+          {backLabel}
         </Link>
         <h1 className="text-2xl font-semibold text-ink mb-1">{title}</h1>
         <p className="text-sm text-ink-secondary">{subtitle}</p>

@@ -27,18 +27,18 @@ export const SITE_PERMISSIONS: Record<string, Role[]> = {
   am3:   ['admin', 'manager'],
   am8:   ['admin', 'manager'],
   am17:  ['admin', 'manager'],
-  razzakabad: ['admin', 'manager'],
+  razzakabad: ['admin', 'am5_user', 'multi_user', 'manager'],
 }
 
 // Which sites each role can see (overview cards + sidebar switcher)
 export const ROLE_SITES: Record<string, string[]> = {
-  admin:     ['am4', 'am5', 'am14', 'am15'],
+  admin:     ['am4', 'am5', 'razzakabad', 'am14', 'am15'],
   am4_user:  ['am4'],
-  am5_user:  ['am5'],
+  am5_user:  ['am5', 'razzakabad'],
   am14_user: ['am14'],
   am15_user: ['am15'],
-  multi_user:['am4', 'am5'],
-  manager:   ['am4', 'am5', 'am14', 'am15'],
+  multi_user:['am4', 'am5', 'razzakabad'],
+  manager:   ['am4', 'am5', 'razzakabad', 'am14', 'am15'],
 }
 
 // Single-site roles go straight into their site after login

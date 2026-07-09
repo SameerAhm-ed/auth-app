@@ -25,6 +25,56 @@ export function MetricGridSkeleton({ count = 6 }: { count?: number }) {
   )
 }
 
+/**
+ * Skeleton for the site overview page — mirrors its card grid (two generation
+ * cards with a donut + legend rows, plus two shorter stat/list cards) so a
+ * refresh shows shaped placeholders instead of a bare "Loading…" line.
+ */
+export function DashboardSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {/* Generation cards: header + donut + legend rows + total bar */}
+      {[0, 1].map((i) => (
+        <Card key={`gen-${i}`} className="overflow-hidden animate-pulse">
+          <div className="flex items-center gap-2 p-4 border-b border-line">
+            <div className="h-4 w-4 rounded bg-surface-subtle" />
+            <div className="h-4 w-40 rounded bg-surface-subtle" />
+          </div>
+          <div className="p-5 flex justify-center">
+            <div className="w-40 h-40 rounded-full border-[16px] border-surface-subtle" />
+          </div>
+          <div className="px-4 pb-4 space-y-3">
+            {Array.from({ length: 4 }).map((_, r) => (
+              <div key={r} className="flex items-center justify-between">
+                <div className="h-3 w-28 rounded bg-surface-subtle" />
+                <div className="h-3 w-16 rounded bg-surface-subtle" />
+              </div>
+            ))}
+            <div className="h-9 w-full rounded-lg bg-surface-subtle" />
+          </div>
+        </Card>
+      ))}
+      {/* Shorter cards: header + a few rows (stat grid / gas pressures) */}
+      {[0, 1].map((i) => (
+        <Card key={`aux-${i}`} className="overflow-hidden h-fit animate-pulse">
+          <div className="flex items-center gap-2 p-4 border-b border-line">
+            <div className="h-4 w-4 rounded bg-surface-subtle" />
+            <div className="h-4 w-32 rounded bg-surface-subtle" />
+          </div>
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 4 }).map((_, r) => (
+              <div key={r} className="flex items-center justify-between">
+                <div className="h-3 w-24 rounded bg-surface-subtle" />
+                <div className="h-3 w-14 rounded bg-surface-subtle" />
+              </div>
+            ))}
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 /** Empty / error state card. */
 export function StateCard({
   variant = 'empty',

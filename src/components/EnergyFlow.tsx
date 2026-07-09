@@ -62,7 +62,7 @@ const FlowValue = ({ x, y, value, rotate = 0 }: FlowValueProps) => (
   </text>
 )
 
-export default function EnergyFlow() {
+export default function EnergyFlow({ basePath = '/dashboard/am5' }: { basePath?: string } = {}) {
   const [flowData, setFlowData] = useState({
     ph1toPH2: 0,
     ph2toPH3: 0,
@@ -165,10 +165,10 @@ export default function EnergyFlow() {
       </text>
 
       {/* Nodes */}
-      <Node x={100} y={70} color="#fbbf24" title="PH1" value={`${(flowData.ph1Total / 1000).toFixed(2)} MW`} href="/dashboard/am5/powerhouse1" />
-      <Node x={300} y={70} color="#ec4899" title="PH2" value={`${(flowData.ph2Total / 1000).toFixed(2)} MW`} href="/dashboard/am5/powerhouse2" />
-      <Node x={300} y={270} color="#fb1f24" title="PH3" value={`${(flowData.ph3Total / 1000).toFixed(2)} MW`} href="/dashboard/am5/powerhouse3" />
-      <Node x={100} y={270} color="#60a5fa" title="PH4" value={`${(flowData.ph4Total / 1000).toFixed(2)} MW`} href="/dashboard/am5/powerhouse4" />
+      <Node x={100} y={70} color="#fbbf24" title="PH1" value={`${(flowData.ph1Total / 1000).toFixed(2)} MW`} href={`${basePath}/powerhouse1`} />
+      <Node x={300} y={70} color="#ec4899" title="PH2" value={`${(flowData.ph2Total / 1000).toFixed(2)} MW`} href={`${basePath}/powerhouse2`} />
+      <Node x={300} y={270} color="#fb1f24" title="PH3" value={`${(flowData.ph3Total / 1000).toFixed(2)} MW`} href={`${basePath}/powerhouse3`} />
+      <Node x={100} y={270} color="#60a5fa" title="PH4" value={`${(flowData.ph4Total / 1000).toFixed(2)} MW`} href={`${basePath}/powerhouse4`} />
 
       {/* Corner fuel labels */}
       <text x="305" y="325" textAnchor="middle" className="text-[12px] font-bold" style={{ fill: 'var(--color-ink-secondary)' }}>
