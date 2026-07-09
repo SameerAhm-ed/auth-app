@@ -1,4 +1,4 @@
-// /dashboard/am5/powerhouse4/page.tsx
+// /dashboard/razzakabad/powerhouse4/page.tsx
 'use client'
 
 import Link from 'next/link'
@@ -27,7 +27,7 @@ const TAKEOFFS: TakeoffCfg[] = [
   { key: 'AUXILIARY_kw', label: 'Auxiliary', capacity: 1250 },
 ]
 
-const BACK = { back: '/dashboard/am5/powerhouse4', backLabel: 'Power House 4' }
+const BACK = { back: '/dashboard/razzakabad/powerhouse4', backLabel: 'Power House 4' }
 
 export default function PowerHouse4Page() {
   const { data, loading, error } = useLiveData<Row>('/api/v1/am5/powerhouse4')
@@ -36,7 +36,7 @@ export default function PowerHouse4Page() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/dashboard/am5" className="inline-flex items-center gap-1 text-sm text-ink-secondary hover:text-ink transition-colors mb-2">
+        <Link href="/dashboard/razzakabad" className="inline-flex items-center gap-1 text-sm text-ink-secondary hover:text-ink transition-colors mb-2">
           <ChevronLeft size={15} />
           AM5 overview
         </Link>

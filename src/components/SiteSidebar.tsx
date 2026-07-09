@@ -20,6 +20,7 @@ const SITE_META: Record<string, { label: string }> = {
   am15: { label: 'AM15' },
   am17: { label: 'AM17' },
   am8:  { label: 'AM8'  },
+  razzakabad: { label: 'Razzakabad' },
 }
 
 const NAV_ITEMS = [
@@ -42,8 +43,36 @@ const SITE_EXTRA_NAV: Record<string, { label: string; path: string; icon: typeof
 type NavItem = { label: string; path: string; icon: typeof LayoutDashboard }
 type NavGroup = { heading?: string; items: NavItem[] }
 
+// Shared full nav for the Razzakabad cluster (also used by the AM5 route).
+const RAZZAKABAD_NAV: NavGroup[] = [
+  { items: [{ label: 'Dashboard', path: '', icon: LayoutDashboard }] },
+  {
+    heading: 'Power Houses',
+    items: [
+      { label: 'Power House 1', path: '/powerhouse1', icon: Factory },
+      { label: 'Power House 2', path: '/powerhouse2', icon: Factory },
+      { label: 'Power House 3', path: '/powerhouse3', icon: Factory },
+      { label: 'Power House 4', path: '/powerhouse4', icon: Factory },
+    ],
+  },
+  {
+    heading: 'Steam',
+    items: [
+      { label: 'Steam PH 1', path: '/steamph1', icon: Flame },
+      { label: 'Steam PH 2', path: '/steamph2', icon: Flame },
+      { label: 'Steam PH 3', path: '/steamph3', icon: Flame },
+      { label: 'Steam PH 4', path: '/steamph4', icon: Flame },
+      { label: 'Coal Boiler 1', path: '/coalboiler1', icon: Flame },
+      { label: 'Coal Boiler 2', path: '/coalboiler2', icon: Flame },
+    ],
+  },
+  { items: [{ label: 'Solar', path: '/solar', icon: Sun }] },
+]
+
 // Sites with many pages get fully custom, grouped nav (overrides the default).
 const SITE_NAV: Record<string, NavGroup[]> = {
+  razzakabad: RAZZAKABAD_NAV,
+  // AM5 is a reduced view: Power Houses 1–2 and Steam PH 1–2 + coal boilers only.
   am5: [
     { items: [{ label: 'Dashboard', path: '', icon: LayoutDashboard }] },
     {
@@ -51,8 +80,6 @@ const SITE_NAV: Record<string, NavGroup[]> = {
       items: [
         { label: 'Power House 1', path: '/powerhouse1', icon: Factory },
         { label: 'Power House 2', path: '/powerhouse2', icon: Factory },
-        { label: 'Power House 3', path: '/powerhouse3', icon: Factory },
-        { label: 'Power House 4', path: '/powerhouse4', icon: Factory },
       ],
     },
     {
@@ -60,8 +87,6 @@ const SITE_NAV: Record<string, NavGroup[]> = {
       items: [
         { label: 'Steam PH 1', path: '/steamph1', icon: Flame },
         { label: 'Steam PH 2', path: '/steamph2', icon: Flame },
-        { label: 'Steam PH 3', path: '/steamph3', icon: Flame },
-        { label: 'Steam PH 4', path: '/steamph4', icon: Flame },
         { label: 'Coal Boiler 1', path: '/coalboiler1', icon: Flame },
         { label: 'Coal Boiler 2', path: '/coalboiler2', icon: Flame },
       ],
