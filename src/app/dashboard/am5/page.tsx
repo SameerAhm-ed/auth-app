@@ -3,10 +3,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Zap, Flame, Gauge, Network, ChevronRight, BarChart3 } from 'lucide-react'
+import { Zap, Flame, Gauge, ChevronRight, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Donut } from '@/components/metrics/Donut'
-import EnergyFlow from '@/components/EnergyFlow'
+import { DashboardSkeleton } from '@/components/metrics/MetricStates'
 
 interface DashboardRow {
   powerhouse1gen: number
@@ -33,12 +33,14 @@ interface PH1T { takeoff1kw: number; takeoff2kw: number; takeoff3kw: number }
 interface PH2T { Takeoff4kw: number; Takeoff5kw: number; Takeoff6kw: number; Takeoff7kw: number; Takeoff8kw: number; AUX_LV_Takeoff: number }
 interface PH3T { Takeoff1kw: number; Takeoff2kw: number; Takeoff3kw: number; Takeoff4kw: number }
 interface AM17T { AUXILIARY_kw: number; TOWARDS_PH1_kw: number; AM17_B_kw: number }
+interface SolarRow { solar_total_kW: number }
 interface ApiResponse {
   dashboard: DashboardRow[]
   ph1_takeoffs: PH1T[]
   ph2_takeoffs: PH2T[]
   ph3_takeoffs: PH3T[]
   am17_takeoffs: AM17T[]
+  am5_solar: SolarRow[]
 }
 
 const PALETTE = ['#5b82c9', '#c06c9e', '#cda13f', '#4faaa3', '#9a9ac6', '#e0852b']
@@ -79,6 +81,8 @@ export default function AM5DashboardPage() {
   }, [])
 
   const row = resp?.dashboard?.[0]
+  // AM5-only solar (dashboard.totalsolargen is the whole cluster).
+  const solarKw = resp?.am5_solar?.[0]?.solar_total_kW ?? 0
 
   return (
     <div className="space-y-6">
@@ -88,7 +92,7 @@ export default function AM5DashboardPage() {
       </div>
 
       {loading && !row ? (
-        <p className="text-sm text-ink-muted animate-pulse">Loading dashboard…</p>
+        <DashboardSkeleton />
       ) : error && !row ? (
         <Card className="p-10 text-center max-w-md">
           <h2 className="text-base font-semibold text-ink mb-1">Couldn&apos;t load data</h2>
@@ -107,39 +111,23 @@ export default function AM5DashboardPage() {
           <p className="text-sm text-ink-secondary">There&apos;s no dashboard data to show right now.</p>
         </Card>
       ) : (
-        <Content resp={resp!} row={row} reconnecting={!!error} />
+        <Content row={row} solarKw={solarKw} reconnecting={!!error} />
       )}
     </div>
   )
 }
 
-function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: DashboardRow; reconnecting: boolean }) {
-  const ph1 = resp.ph1_takeoffs?.[0]
-  const ph2 = resp.ph2_takeoffs?.[0]
-  const ph3 = resp.ph3_takeoffs?.[0]
-  const am17 = resp.am17_takeoffs?.[0]
-
-  const am5 = (ph1?.takeoff1kw ?? 0) + (ph1?.takeoff2kw ?? 0) + (ph1?.takeoff3kw ?? 0) + (ph2?.Takeoff4kw ?? 0) + (ph2?.Takeoff5kw ?? 0) + (ph2?.Takeoff6kw ?? 0) + (ph2?.AUX_LV_Takeoff ?? 0)
-  const am8 = ph2?.Takeoff7kw ?? 0
-  const am17a = (ph3?.Takeoff3kw ?? 0) + (ph3?.Takeoff4kw ?? 0)
-  const am17b = (am17?.AM17_B_kw ?? 0) + (am17?.AUXILIARY_kw ?? 0)
-  const am18 = ph3?.Takeoff1kw ?? 0
-
+function Content({ row, solarKw, reconnecting }: { row: DashboardRow; solarKw: number; reconnecting: boolean }) {
   const elec = [
     { label: 'Power House 1', value: row.powerhouse1gen, href: '/dashboard/am5/powerhouse1' },
     { label: 'Power House 2', value: row.powerhouse2gen, href: '/dashboard/am5/powerhouse2' },
-    { label: 'Power House 3', value: row.powerhouse3gen, href: '/dashboard/am5/powerhouse3' },
-    { label: 'Power House 4', value: row.AM17_PH2, href: '/dashboard/am5/powerhouse4' },
-    { label: 'Solar', value: row.totalsolargen, href: '/dashboard/am5/solar' },
-    { label: 'KE', value: row.ke_kw, href: '/dashboard/am5/powerhouse3' },
+    { label: 'Solar', value: solarKw, href: '/dashboard/am5/solar' },
   ].map((s, i) => ({ ...s, color: PALETTE[i] }))
   const elecTotal = elec.reduce((a, s) => a + s.value, 0)
 
   const steam = [
     { label: 'Steam Power House 1', value: row.steamph1, href: '/dashboard/am5/steamph1' },
     { label: 'Steam Power House 2', value: row.steamph2, href: '/dashboard/am5/steamph2' },
-    { label: 'Steam Power House 3', value: row.steamph3, href: '/dashboard/am5/steamph3' },
-    { label: 'Steam Power House 4', value: row.steamph4, href: '/dashboard/am5/steamph4' },
     { label: 'Coal Boiler 1', value: row.cb, href: '/dashboard/am5/coalboiler1' },
     { label: 'Coal Boiler 2', value: row.new_cb, href: '/dashboard/am5/coalboiler2' },
   ].map((s, i) => ({ ...s, color: PALETTE[i] }))
@@ -155,45 +143,6 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
           </span>
         </div>
       )}
-
-      {/* Overview — energy-flow diagram + distribution readout */}
-      <Card className="overflow-hidden">
-        <CardHead icon={<Network size={16} className="text-ink-muted" aria-hidden="true" />} title="Overview" />
-        <div className="p-4">
-          <EnergyFlow />
-          <div className="mt-3 grid grid-cols-5 gap-1 text-center">
-            {[
-              { label: 'AM5', value: `${am5.toFixed(0)} kW` },
-              { label: 'AM8', value: `${am8.toFixed(0)} kW` },
-              { label: 'AM17 A', value: `${am17a.toFixed(0)} kW` },
-              { label: 'AM17 B', value: `${am17b.toFixed(0)} kW` },
-              { label: 'AM18', value: `${am18.toFixed(0)} kW` },
-            ].map((c) => (
-              <div key={c.label} className="text-[10px] sm:text-xs text-ink-muted uppercase tracking-tight pb-1 border-b border-line">
-                {c.label}
-              </div>
-            ))}
-            {[am5, am8, am17a, am17b, am18].map((v, i) => (
-              <div key={i} className="text-[11px] sm:text-sm font-semibold text-ink tabular-nums pt-1.5">
-                {v.toFixed(0)} kW
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {/* Steam pressures */}
-      <StatGridCard
-        title="Steam Pressures"
-        icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />}
-        columns={[
-          { label: 'H1', value: `${row.steam_pressure_mainheader_1.toFixed(0)} PSI` },
-          { label: 'H2&3', value: `${row.steam_pressure_mainheader_2_and_3.toFixed(0)} PSI` },
-          { label: 'H4', value: `${row.steam_pressure_mainheader_4.toFixed(0)} PSI` },
-          { label: 'AM17 H1', value: '0 PSI' },
-          { label: 'AM17 H2', value: '0 PSI' },
-        ]}
-      />
 
       {/* Electrical generation */}
       <Card className="overflow-hidden">
@@ -239,6 +188,17 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
         </div>
       </Card>
 
+      {/* Steam pressures */}
+      <StatGridCard
+        title="Steam Pressures"
+        icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />}
+        columns={[
+          { label: 'H1', value: `${row.steam_pressure_mainheader_1.toFixed(0)} PSI` },
+          { label: 'H2&3', value: `${row.steam_pressure_mainheader_2_and_3.toFixed(0)} PSI` },
+          { label: 'H4', value: `${row.steam_pressure_mainheader_4.toFixed(0)} PSI` },
+        ]}
+      />
+
       {/* Gas pressures */}
       <Card className="overflow-hidden">
         <CardHead icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />} title="Gas Pressures" />
@@ -281,7 +241,10 @@ function StatGridCard({ title, icon, columns }: { title: string; icon: React.Rea
     <Card className="overflow-hidden h-fit">
       <CardHead icon={icon} title={title} />
       <div className="p-4">
-        <div className="grid grid-cols-5 gap-1 text-center">
+        <div
+          className="grid gap-1 text-center"
+          style={{ gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }}
+        >
           {columns.map((c) => (
             <div key={c.label} className="text-[10px] sm:text-xs text-ink-muted uppercase tracking-tight pb-1 border-b border-line">
               {c.label}
