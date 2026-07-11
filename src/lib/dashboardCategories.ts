@@ -46,7 +46,6 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     ams: [
       { id: 'am2', label: 'AM2' },
       { id: 'am3', label: 'AM3' },
-      { id: 'am16', label: 'AM16' },
       { id: 'am_pq', label: 'AM PQ' },
     ],
   },
@@ -57,6 +56,13 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
       { id: 'am4', label: 'AM4', live: true },
       { id: 'am14', label: 'AM14', live: true },
       { id: 'am15', label: 'AM15', live: true },
+    ],
+  },
+  {
+    name: 'Art Mill',
+    icon: 'palette',
+    ams: [
+      { id: 'am16', label: 'AM16' },
     ],
   },
 ]
