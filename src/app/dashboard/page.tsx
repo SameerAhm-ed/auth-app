@@ -1,14 +1,16 @@
 import { headers } from 'next/headers'
-import { SITE_PERMISSIONS, type Role } from '@/lib/constants'
+import { canAccessSite, sitesFromHeader, isRole, type Role } from '@/lib/constants'
 import { DASHBOARD_CATEGORIES } from '@/lib/dashboardCategories'
 import { DashboardGrid } from './DashboardGrid'
 
 export default async function OverviewPage() {
   const headersList = await headers()
   const name = headersList.get('x-user-name') || 'User'
-  const role = (headersList.get('x-user-role') || 'am4_user') as Role
+  const roleHeader = headersList.get('x-user-role')
+  const role: Role = isRole(roleHeader) ? roleHeader : 'user'
+  const sites = sitesFromHeader(headersList.get('x-user-sites'))
 
-  const canAccess = (id: string) => SITE_PERMISSIONS[id]?.includes(role) ?? false
+  const canAccess = (id: string) => canAccessSite(role, sites, id)
 
   // Keep only the AMs this role can access; drop empty subgroups and categories.
   const categories = DASHBOARD_CATEGORIES.map((c) => ({

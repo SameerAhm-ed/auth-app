@@ -60,3 +60,17 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     ],
   },
 ]
+
+// Flat id → display label for every site (mills + cluster subgroups). Declared
+// after DASHBOARD_CATEGORIES so it reads the fully-initialized list.
+export const SITE_LABELS: Record<string, string> = Object.fromEntries(
+  DASHBOARD_CATEGORIES.flatMap((c) => [
+    ...(c.subgroups ?? []).flatMap((g) => (g.id ? [[g.id, g.name] as const] : [])),
+    ...categoryAms(c).map((a) => [a.id, a.label] as const),
+  ]),
+)
+
+/** Display label for a site id, falling back to the upper-cased id. */
+export function siteLabel(id: string): string {
+  return SITE_LABELS[id] ?? id.toUpperCase()
+}

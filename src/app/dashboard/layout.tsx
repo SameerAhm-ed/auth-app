@@ -1,10 +1,12 @@
 import { headers } from 'next/headers'
 import Link from 'next/link'
+import { Users } from 'lucide-react'
 import LogoutButton from '@/components/LogoutButton'
 import MobileMenuButton from '@/components/MobileMenuButton'
 import { MobileSidebarProvider } from '@/components/MobileSidebar'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { InstallButton } from '@/components/InstallButton'
+import SessionKeepAlive from '@/components/SessionKeepAlive'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const headersList = await headers()
@@ -16,6 +18,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <MobileSidebarProvider>
     <div className="min-h-dvh bg-canvas">
+      <SessionKeepAlive />
       {/* Skip to main content (keyboard / screen-reader users) */}
       <a
         href="#main-content"
@@ -50,6 +53,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
               {initials}
             </div>
             <div className="w-px h-5 bg-line mx-1 hidden sm:block" />
+            {role === 'admin' && (
+              <Link
+                href="/dashboard/admin/users"
+                aria-label="User management"
+                title="User management"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
+              >
+                <Users size={17} />
+              </Link>
+            )}
             <InstallButton />
             <ThemeToggle />
             <LogoutButton />

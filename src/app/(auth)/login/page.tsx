@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
@@ -10,7 +9,7 @@ import { Alert } from '@/components/ui/Alert'
 
 export default function LoginPage() {
   const router = useRouter()
-  const [form, setForm] = useState({ email: '', password: '' })
+  const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -38,9 +37,8 @@ export default function LoginPage() {
         return
       }
 
-      // Let the server (proxy.ts) route to the right place based on role:
-      // single-site roles are sent straight to their site, others see the overview.
-      router.push('/dashboard')
+      // Server returns where to land (single-site users go straight to their site).
+      router.push(data.redirect || '/dashboard')
       router.refresh()
     } catch {
       setError('Network error. Please try again.')
@@ -60,15 +58,16 @@ export default function LoginPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Input
-          label="Email address"
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
+          label="Username"
+          id="username"
+          name="username"
+          type="text"
+          autoComplete="username"
+          autoCapitalize="none"
           required
-          value={form.email}
+          value={form.username}
           onChange={handleChange}
-          placeholder="you@example.com"
+          placeholder="Enter your username"
         />
 
         <Input
@@ -90,13 +89,9 @@ export default function LoginPage() {
 
       <div className="mt-6 pt-5 border-t border-line text-center">
         <p className="text-sm text-ink-secondary">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-brand font-medium hover:underline">
-            Create account
-          </Link>
+          Accounts are created by your administrator.
         </p>
       </div>
-
     </Card>
   )
 }

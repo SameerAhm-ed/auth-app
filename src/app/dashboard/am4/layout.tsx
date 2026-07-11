@@ -1,11 +1,10 @@
 import { headers } from 'next/headers'
 import SiteSidebar from '@/components/SiteSidebar'
-import { ROLE_SITES } from '@/lib/constants'
+import { sitesFromHeader } from '@/lib/constants'
 
 export default async function AM4Layout({ children }: { children: React.ReactNode }) {
   const headersList = await headers()
-  const role = headersList.get('x-user-role') || 'am4_user'
-  const allowedSites = ROLE_SITES[role] || []
+  const allowedSites = sitesFromHeader(headersList.get('x-user-sites'))
 
   return (
     <div className="flex min-h-[calc(100dvh-56px)]">
