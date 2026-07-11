@@ -5,22 +5,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useMobileSidebar } from './MobileSidebar'
+import { siteLabel } from '@/lib/dashboardCategories'
 
 interface Props {
   site: string        // current site e.g. "am4"
   label: string       // display label e.g. "AM4"
   accentColor: string // reserved for future per-site theming (grayscale for now)
   allowedSites: string[] // all sites this user can access
-}
-
-const SITE_META: Record<string, { label: string }> = {
-  am4:  { label: 'AM4'  },
-  am5:  { label: 'AM5'  },
-  am14: { label: 'AM14' },
-  am15: { label: 'AM15' },
-  am17: { label: 'AM17' },
-  am8:  { label: 'AM8'  },
-  razzakabad: { label: 'Razzakabad' },
 }
 
 const NAV_ITEMS = [
@@ -146,7 +137,6 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
           </p>
           <div className="space-y-0.5">
             {allowedSites.map((s) => {
-              const meta     = SITE_META[s]
               const isActive = s === site
               return (
                 <Link
@@ -160,7 +150,7 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
                     <span
                       className={`w-1.5 h-1.5 rounded-full shrink-0 ${isActive ? 'bg-brand' : 'bg-line-strong'}`}
                     />
-                    {meta.label}
+                    {siteLabel(s)}
                   </div>
                   {isActive && <ChevronRight size={13} />}
                 </Link>
