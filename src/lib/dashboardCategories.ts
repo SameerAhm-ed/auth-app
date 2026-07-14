@@ -62,7 +62,7 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     name: 'Art Mill',
     icon: 'palette',
     ams: [
-      { id: 'am16', label: 'AM16' },
+      { id: 'am16', label: 'Art Mill' },
     ],
   },
 ]
