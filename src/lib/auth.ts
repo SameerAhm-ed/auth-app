@@ -1,6 +1,14 @@
+import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
-import { JWT_SECRET, TOKEN_TTL } from './constants'
-import { Role } from './constants'
+import { TOKEN_TTL, Role } from './constants'
+
+// Mandatory in production; dev-only fallback so local runs work without setup.
+// Lives here (not constants.ts) so the check never reaches a client bundle.
+const DEV_SECRET = 'dev-only-insecure-secret-change-me'
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET is required in production')
+}
+const JWT_SECRET = process.env.JWT_SECRET || DEV_SECRET
 
 export interface JWTPayload {
   id: string

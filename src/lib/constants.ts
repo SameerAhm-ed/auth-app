@@ -15,12 +15,8 @@ export const ROLE_VALUES: Role[] = ['admin', 'manager', 'user']
 export const isRole = (v: unknown): v is Role => ROLE_VALUES.includes(v as Role)
 
 // ── Session / JWT ────────────────────────────────────────────────
-// Mandatory in production; dev-only fallback so local runs work without setup.
-const DEV_SECRET = 'dev-only-insecure-secret-change-me'
-if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('JWT_SECRET is required in production')
-}
-export const JWT_SECRET = process.env.JWT_SECRET || DEV_SECRET
+// The JWT secret itself lives in auth.ts (server-only). This file is
+// imported by client components, so it must never touch secrets.
 export const COOKIE_NAME = 'auth-token'
 
 // Rolling session: a short-lived token the client refreshes while the
