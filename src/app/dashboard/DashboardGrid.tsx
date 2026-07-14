@@ -375,7 +375,7 @@ function MillRow({ am, t, inset }: { am: DashboardAM; t?: AmTotal; inset?: boole
               Online
             </span>
           ) : (
-            <span className="text-[10px] font-medium text-[var(--ink-3)] bg-[var(--bg)] rounded-full px-1.5 py-px shrink-0">Not instrumented</span>
+            <span className="text-[10px] font-medium text-[var(--ink-3)] bg-[var(--bg)] rounded-full px-1.5 py-px shrink-0">Coming Soon</span>
           )}
         </span>
         {am.live && t?.src && <SourceLine src={t.src} />}
