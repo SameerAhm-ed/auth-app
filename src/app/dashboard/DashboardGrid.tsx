@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Zap, Flame, MapPin, ChevronRight } from 'lucide-react'
 import { categoryAms, type DashboardAM, type DashboardCategory, type DashboardSubgroup } from '@/lib/dashboardCategories'
 
-type SrcSplit = { gen: number; ke: number; solar: number }
+type SrcSplit = { gen: number; hfo: number; ke: number; solar: number }
 type AmTotal = { power: number; steam: number; src?: SrcSplit }
 type Summary = Record<string, AmTotal>
 
@@ -24,6 +24,7 @@ const LIGHT = {
   '--teal-deep': '#0f766e',
   '--teal-soft': '#e6f3f2',
   '--ok': '#108a5c',
+  '--hfo': '#3b82a6',
   '--ke': '#64748b',
   '--sol': '#f59e0b',
 } as CSSProperties
@@ -41,14 +42,19 @@ const DARK = {
   '--teal-deep': '#2dd4bf',
   '--teal-soft': '#12302b',
   '--ok': '#34d399',
+  '--hfo': '#4b93b8',
   '--ke': '#94a3b8',
   '--sol': '#fbbf24',
 } as CSSProperties
 
-/* Power sources — three fixed semantic colors, identical everywhere:
-   Engines (self-generation) = teal · KE grid import = slate · Solar = amber */
+/* Power sources — fixed semantic colors, identical everywhere:
+   GAS (self-generation on gas) = teal · HFO = blue · KE grid import = slate ·
+   Solar = amber. `label` shows in the plant-wide "Power source mix" legend;
+   `short` shows in the per-mill source lines (kept as "Eng"). HFO/KE segments
+   only render when > 0, so HFO surfaces only while those engines are running. */
 const SOURCES = [
-  { key: 'gen' as const, label: 'Engines', short: 'Eng', color: 'var(--teal)' },
+  { key: 'gen' as const, label: 'GAS', short: 'Eng', color: 'var(--teal)' },
+  { key: 'hfo' as const, label: 'HFO', short: 'HFO', color: 'var(--hfo)' },
   { key: 'ke' as const, label: 'KE grid', short: 'KE', color: 'var(--ke)' },
   { key: 'solar' as const, label: 'Solar', short: 'Sol', color: 'var(--sol)' },
 ]
@@ -128,12 +134,12 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
   for (const a of allAms) { const t = summary[a.id]; if (t) { plantPower += t.power; plantSteam += t.steam } }
 
   // Plant-level source mix, summed across all reporting mills.
-  const srcTotals: SrcSplit = { gen: 0, ke: 0, solar: 0 }
+  const srcTotals: SrcSplit = { gen: 0, hfo: 0, ke: 0, solar: 0 }
   for (const a of allAms) {
     const s = summary[a.id]?.src
-    if (s) { srcTotals.gen += s.gen; srcTotals.ke += s.ke; srcTotals.solar += s.solar }
+    if (s) { srcTotals.gen += s.gen; srcTotals.hfo += s.hfo; srcTotals.ke += s.ke; srcTotals.solar += s.solar }
   }
-  const srcSum = srcTotals.gen + srcTotals.ke + srcTotals.solar
+  const srcSum = srcTotals.gen + srcTotals.hfo + srcTotals.ke + srcTotals.solar
 
   const today = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
 
@@ -198,11 +204,13 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
           </div>
           <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">
             {SOURCES.map((s) => (
-              <span key={s.key} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--ink-2)] tabular-nums">
-                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
-                {s.label}
-                <span className="text-[var(--ink-3)]">{fmtMW(srcTotals[s.key])} MW · {srcSum > 0 ? Math.round((srcTotals[s.key] / srcSum) * 100) : 0}%</span>
-              </span>
+              srcTotals[s.key] > 0 ? (
+                <span key={s.key} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--ink-2)] tabular-nums">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                  {s.label}
+                  <span className="text-[var(--ink-3)]">{fmtMW(srcTotals[s.key])} MW · {srcSum > 0 ? Math.round((srcTotals[s.key] / srcSum) * 100) : 0}%</span>
+                </span>
+              ) : null
             ))}
           </div>
         </div>
@@ -333,7 +341,7 @@ function ClusterBand({ group, summary }: { group: DashboardSubgroup; summary: Su
 
 /** Per-mill source breakdown: slim segmented bar + live MW per active source. */
 function SourceLine({ src }: { src: SrcSplit }) {
-  const sum = src.gen + src.ke + src.solar
+  const sum = src.gen + src.hfo + src.ke + src.solar
   if (sum <= 0) return null
   const active = SOURCES.filter((s) => src[s.key] > 0)
   return (
