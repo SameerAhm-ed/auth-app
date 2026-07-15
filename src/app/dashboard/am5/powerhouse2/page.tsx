@@ -1,6 +1,7 @@
 // /dashboard/am5/powerhouse2/page.tsx
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { useLiveData } from '@/components/metrics/useLiveData'
@@ -41,6 +42,26 @@ export default function PowerHouse2Page() {
   const { data, loading, error } = useLiveData<Row>('/api/v1/am5/powerhouse2')
   const row = data[0]
 
+  // FGC gas pressure lives in the `dashboard` table (not `powerhouse2`), so it's
+  // polled separately here and shown on the Turbine card.
+  const [fgc, setFgc] = useState<number | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    const refresh = async () => {
+      try {
+        const r = await fetch('/api/v1/am5/dashboard', { cache: 'no-store' })
+        if (!r.ok) return
+        const j = await r.json()
+        if (!cancelled && j?.data?.dashboard?.[0]) setFgc(j.data.dashboard[0].fgc ?? null)
+      } catch {
+        /* keep last-good value on a failed tick */
+      }
+    }
+    refresh()
+    const id = setInterval(refresh, 1000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+
   return (
     <div className="space-y-6">
       <div>
@@ -73,6 +94,7 @@ export default function PowerHouse2Page() {
                     capacity={e.capacity}
                     status={loadStatus(value, 10)}
                     fuel={fuelFromBit(row[e.bit])}
+                    metrics={e.key === 'turbinekw' && fgc != null ? [{ label: 'FGC', value: `${fgc} PSI` }] : undefined}
                     reportHref={reportHref({ tag: e.tag, label: e.label, unit: 'kWh', ...BACK })}
                   />
                 )

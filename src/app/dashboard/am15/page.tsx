@@ -134,7 +134,7 @@ function GenerationCard({ row, error }: { row: AM15Powerhouse; error: string }) 
 
 function GasPressuresCard({ row }: { row: AM15Powerhouse }) {
   const rows = [
-    { label: 'Capacitive', value: row.PRESSURE_CAP_PSI ?? 0 },
+    { label: 'Captive', value: row.PRESSURE_CAP_PSI ?? 0 },
     { label: 'Industrial', value: row.PRESSURE_IND_PSI ?? 0 },
   ]
   return (
