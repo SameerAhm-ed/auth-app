@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Zap, Flame, ChevronRight, BarChart3 } from 'lucide-react'
+import { Zap, Flame, Gauge, ChevronRight, BarChart3 } from 'lucide-react'
 import { Card } from '@/components/ui/Card'
 import { Donut } from '@/components/metrics/Donut'
 
@@ -14,6 +14,7 @@ interface DashboardRow {
   ke_kw: number
   steamph3: number
   steamph4: number
+  rlng_psi: number
 }
 
 interface ApiResponse {
@@ -156,6 +157,23 @@ function Content({ row, reconnecting }: { row: DashboardRow; reconnecting: boole
             ))}
           </div>
           <TotalBar label="Total Steam Generation" value={`${steamTotal.toFixed(1)} T/H`} />
+        </div>
+      </Card>
+
+      {/* Gas pressures */}
+      <Card className="overflow-hidden h-fit">
+        <CardHead icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />} title="Gas Pressures" />
+        <div className="px-4 py-2 divide-y divide-line">
+          {[
+            { label: 'RLNG', psi: row.rlng_psi },
+          ].map((g) => (
+            <div key={g.label} className="flex items-center justify-between py-3 text-sm">
+              <span className="text-ink-secondary">{g.label}</span>
+              <span className="tabular-nums text-ink font-medium">
+                {g.psi} <span className="text-ink-muted font-normal">PSI</span>
+              </span>
+            </div>
+          ))}
         </div>
       </Card>
     </div>

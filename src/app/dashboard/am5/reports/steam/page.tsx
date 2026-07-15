@@ -563,7 +563,7 @@ export default function SteamGenerationReport() {
 
           {/* Coal boiler */}
           <Card className="overflow-hidden">
-            <SectionHead icon={<Flame size={16} className="text-ink-muted" aria-hidden="true" />} title="Coal Boiler (Outsource)" />
+            <SectionHead icon={<Flame size={16} className="text-ink-muted" aria-hidden="true" />} title="Out Source Boiler" />
             <div className="p-4 grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatTile label="Coal consumed" value={coalConsumedDisplay} unit="tons" />
               <StatTile label="Steam generated" value={coalSteamDiff} unit="tons" />

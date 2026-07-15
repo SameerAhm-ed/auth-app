@@ -128,8 +128,8 @@ function Content({ row, solarKw, reconnecting }: { row: DashboardRow; solarKw: n
   const steam = [
     { label: 'Steam Power House 1', value: row.steamph1, href: '/dashboard/am5/steamph1' },
     { label: 'Steam Power House 2', value: row.steamph2, href: '/dashboard/am5/steamph2' },
-    { label: 'Coal Boiler 1', value: row.cb, href: '/dashboard/am5/coalboiler1' },
-    { label: 'Coal Boiler 2', value: row.new_cb, href: '/dashboard/am5/coalboiler2' },
+    { label: 'Out Source Boiler 1', value: row.cb, href: '/dashboard/am5/coalboiler1' },
+    { label: 'Out Source Boiler 2', value: row.new_cb, href: '/dashboard/am5/coalboiler2' },
   ].map((s, i) => ({ ...s, color: PALETTE[i] }))
   const steamTotal = steam.reduce((a, s) => a + s.value, 0)
 
@@ -193,9 +193,9 @@ function Content({ row, solarKw, reconnecting }: { row: DashboardRow; solarKw: n
         title="Steam Pressures"
         icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />}
         columns={[
-          { label: 'H1', value: `${row.steam_pressure_mainheader_1.toFixed(0)} PSI` },
-          { label: 'H2&3', value: `${row.steam_pressure_mainheader_2_and_3.toFixed(0)} PSI` },
-          { label: 'H4', value: `${row.steam_pressure_mainheader_4.toFixed(0)} PSI` },
+          { label: 'Header 1', value: `${row.steam_pressure_mainheader_1.toFixed(0)} PSI` },
+          { label: 'Header 2 & 3', value: `${row.steam_pressure_mainheader_2_and_3.toFixed(0)} PSI` },
+          { label: 'Header 4', value: `${row.steam_pressure_mainheader_4.toFixed(0)} PSI` },
         ]}
       />
 
@@ -204,10 +204,8 @@ function Content({ row, solarKw, reconnecting }: { row: DashboardRow; solarKw: n
         <CardHead icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />} title="Gas Pressures" />
         <div className="px-4 py-2 divide-y divide-line">
           {[
-            { label: 'Capacitive', psi: row.ngas_psi },
+            { label: 'Captive', psi: row.ngas_psi },
             { label: 'Industrial', psi: row.industrialgas_psi },
-            { label: 'RLNG', psi: row.rlng_psi },
-            { label: 'FGC', psi: row.fgc },
           ].map((g) => (
             <div key={g.label} className="flex items-center justify-between py-3 text-sm">
               <span className="text-ink-secondary">{g.label}</span>

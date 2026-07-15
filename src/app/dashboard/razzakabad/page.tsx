@@ -141,8 +141,8 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
     { label: 'Steam Power House 2', value: row.steamph2, href: '/dashboard/razzakabad/steamph2' },
     { label: 'Steam Power House 3', value: row.steamph3, href: '/dashboard/razzakabad/steamph3' },
     { label: 'Steam Power House 4', value: row.steamph4, href: '/dashboard/razzakabad/steamph4' },
-    { label: 'Coal Boiler 1', value: row.cb, href: '/dashboard/razzakabad/coalboiler1' },
-    { label: 'Coal Boiler 2', value: row.new_cb, href: '/dashboard/razzakabad/coalboiler2' },
+    { label: 'Out Source Boiler 1', value: row.cb, href: '/dashboard/razzakabad/coalboiler1' },
+    { label: 'Out Source Boiler 2', value: row.new_cb, href: '/dashboard/razzakabad/coalboiler2' },
   ].map((s, i) => ({ ...s, color: PALETTE[i] }))
   const steamTotal = steam.reduce((a, s) => a + s.value, 0)
 
@@ -245,7 +245,7 @@ function Content({ resp, row, reconnecting }: { resp: ApiResponse; row: Dashboar
         <CardHead icon={<Gauge size={16} className="text-ink-muted" aria-hidden="true" />} title="Gas Pressures" />
         <div className="px-4 py-2 divide-y divide-line">
           {[
-            { label: 'Capacitive', psi: row.ngas_psi },
+            { label: 'Captive', psi: row.ngas_psi },
             { label: 'Industrial', psi: row.industrialgas_psi },
             { label: 'RLNG', psi: row.rlng_psi },
             { label: 'FGC', psi: row.fgc },

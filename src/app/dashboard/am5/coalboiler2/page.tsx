@@ -6,10 +6,10 @@ import { BoilerPage } from '@/components/metrics/BoilerPage'
 export default function CoalBoiler2Page() {
   return (
     <BoilerPage
-      title="Coal Boiler 2"
+      title="Out Source Boiler 2"
       subtitle="OS boiler steam flow and status."
       endpoint="/api/v1/am5/steamph3"
-      report={{ back: '/dashboard/am5/coalboiler2', backLabel: 'Coal Boiler 2' }}
+      report={{ back: '/dashboard/am5/coalboiler2', backLabel: 'Out Source Boiler 2' }}
       boilers={[
         {
           label: 'OS Boiler 2',
