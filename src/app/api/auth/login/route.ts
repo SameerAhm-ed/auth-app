@@ -37,7 +37,12 @@ export async function POST(req: NextRequest) {
     res.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      // Lax, not Strict: an installed PWA's first launch from the home-screen
+      // icon is a top-level navigation the browser treats as external —
+      // Strict cookies get dropped on that request, bouncing a valid session
+      // to /login until the next same-origin navigation. Lax still blocks the
+      // cookie on cross-site POST/PUT/DELETE, which is all this app needs.
+      sameSite: 'lax',
       maxAge: TOKEN_MAX_AGE,
       path: '/',
     })
