@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
   res.cookies.set(COOKIE_NAME, fresh, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    // See login/route.ts for why this is Lax, not Strict.
+    sameSite: 'lax',
     maxAge: TOKEN_MAX_AGE,
     path: '/',
   })
