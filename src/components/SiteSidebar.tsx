@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, ChevronDown, X } from 'lucide-react'
 import { useMobileSidebar } from './MobileSidebar'
 import { siteLabel } from '@/lib/dashboardCategories'
+import { siteHref } from '@/lib/constants'
 
 interface Props {
   site: string        // current site e.g. "am4"
@@ -113,35 +114,50 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
   const pathname = usePathname()
   const base = `/dashboard/${site}`
   const hasMultipleSites = allowedSites.length > 1
+  const groups = navGroupsFor(site, label)
+  // Only collapsible when there's more than one heading (Razzakabad/AM5/AM17's
+  // "Power Houses" + "Steam" shape) — a single-heading site nav (the default
+  // "<Site> Pages" group) bundles Dashboard itself, so collapsing it would
+  // hide the site's own landing link. Defaults to all-expanded.
+  const collapsible = groups.filter((g) => g.heading).length > 1
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  const toggleGroup = (heading: string) => setCollapsed((c) => ({ ...c, [heading]: !c[heading] }))
 
   return (
     <>
-      {/* Current site header */}
+      {/* Current site header. Badge is content-sized (min-w, not a fixed w-8)
+          so it never clips its own text for long labels ("Razzakabad"); the
+          title column gets min-w-0 + truncate so it's the one that yields
+          space if the sidebar itself is ever too narrow for both. Neither
+          side can overlap the other regardless of label length or viewport. */}
       <div className="px-4 py-4 border-b border-line">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-surface-subtle text-ink flex items-center justify-center text-xs font-bold shrink-0">
+          <div className="min-w-8 h-8 px-1.5 rounded-lg bg-surface-subtle text-ink flex items-center justify-center text-xs font-bold shrink-0 whitespace-nowrap">
             {label}
           </div>
-          <div>
-            <p className="text-sm font-semibold text-ink">{label}</p>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-ink truncate">{label}</p>
             <p className="text-[11px] text-ink-muted">Site Dashboard</p>
           </div>
         </div>
       </div>
 
-      {/* Site switcher (only for multi-site users) */}
+      {/* Site switcher (only for multi-site users). Capped + independently
+          scrollable: the mobile drawer is pinned to the viewport height, so
+          an uncapped list here (e.g. an admin/manager with many sites) would
+          flex-squeeze the page nav below it down to nothing. */}
       {hasMultipleSites && (
         <div className="px-3 pt-3 pb-2 border-b border-line">
           <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
             Sites
           </p>
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 max-h-[30vh] overflow-y-auto">
             {allowedSites.map((s) => {
               const isActive = s === site
               return (
                 <Link
                   key={s}
-                  href={`/dashboard/${s}`}
+                  href={siteHref(s)}
                   className={`flex items-center justify-between h-11 md:h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
                   }`}
@@ -162,32 +178,47 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
 
       {/* Current site page nav (grouped) */}
       <nav className="flex-1 px-3 py-3 space-y-3 overflow-y-auto">
-        {navGroupsFor(site, label).map((group, gi) => (
-          <div key={group.heading ?? gi} className="space-y-0.5">
-            {group.heading && (
-              <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
-                {group.heading}
-              </p>
-            )}
-            {group.items.map(({ label: navLabel, path, icon: Icon }) => {
-              const href     = base + path
-              const isActive = path === '' ? pathname === base : pathname.startsWith(href)
+        {groups.map((group, gi) => {
+          const isCollapsed = collapsible && group.heading ? !!collapsed[group.heading] : false
+          return (
+            <div key={group.heading ?? gi} className="space-y-0.5">
+              {group.heading && (
+                collapsible ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.heading!)}
+                    aria-expanded={!isCollapsed}
+                    className="w-full flex items-center justify-between px-2 mb-1.5 text-[10px] font-semibold text-ink-muted uppercase tracking-wider hover:text-ink transition-colors"
+                  >
+                    {group.heading}
+                    <ChevronDown size={12} className={`transition-transform ${isCollapsed ? '-rotate-90' : ''}`} />
+                  </button>
+                ) : (
+                  <p className="text-[10px] font-semibold text-ink-muted uppercase tracking-wider px-2 mb-1.5">
+                    {group.heading}
+                  </p>
+                )
+              )}
+              {!isCollapsed && group.items.map(({ label: navLabel, path, icon: Icon }) => {
+                const href     = base + path
+                const isActive = path === '' ? pathname === base : pathname.startsWith(href)
 
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={`flex items-center gap-2.5 h-11 md:h-9 px-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
-                  }`}
-                >
-                  <Icon size={15} />
-                  {navLabel}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={`flex items-center gap-2.5 h-11 md:h-9 px-3 rounded-lg text-sm font-medium transition-colors ${
+                      isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
+                    }`}
+                  >
+                    <Icon size={15} />
+                    {navLabel}
+                  </Link>
+                )
+              })}
+            </div>
+          )
+        })}
       </nav>
 
       {/* Back to overview */}
