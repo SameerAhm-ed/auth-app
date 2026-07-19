@@ -6,7 +6,8 @@ import { Zap, Flame, MapPin, ChevronRight } from 'lucide-react'
 import { categoryAms, type DashboardAM, type DashboardCategory, type DashboardSubgroup } from '@/lib/dashboardCategories'
 
 type SrcSplit = { gen: number; hfo: number; ke: number; solar: number }
-type AmTotal = { power: number; steam: number; src?: SrcSplit }
+type SteamSplit = { gas: number; os: number; biomass: number; whrb: number }
+type AmTotal = { power: number; steam: number; src?: SrcSplit; steamSrc?: SteamSplit }
 type Summary = Record<string, AmTotal>
 
 /* ── Scoped teal theme (light / dark). Follows the app's `.dark` class so the
@@ -27,6 +28,10 @@ const LIGHT = {
   '--hfo': '#3b82a6',
   '--ke': '#64748b',
   '--sol': '#f59e0b',
+  '--whrb': '#0d9488',
+  '--gasb': '#6366f1',
+  '--osb': '#78716c',
+  '--biomass': '#16a34a',
 } as CSSProperties
 
 const DARK = {
@@ -45,6 +50,10 @@ const DARK = {
   '--hfo': '#4b93b8',
   '--ke': '#94a3b8',
   '--sol': '#fbbf24',
+  '--whrb': '#14b8a6',
+  '--gasb': '#818cf8',
+  '--osb': '#a8a29e',
+  '--biomass': '#4ade80',
 } as CSSProperties
 
 /* Power sources — fixed semantic colors, identical everywhere:
@@ -57,6 +66,18 @@ const SOURCES = [
   { key: 'hfo' as const, label: 'HFO', short: 'HFO', color: 'var(--hfo)' },
   { key: 'ke' as const, label: 'KE grid', short: 'KE', color: 'var(--ke)' },
   { key: 'solar' as const, label: 'Solar', short: 'Sol', color: 'var(--sol)' },
+]
+
+/* Steam sources — grouped by boiler type, ordered most individual units to
+   fewest (WHRBs: AM5 PH1 (4) + PH2 HRSG+4 (5) + PH3/PH4 WHRB1-5 (5) + 2
+   uninstrumented on AM4 = 16 · Gas Boilers: GB Bosch + GB Robey + AM5's PH1
+   gas-fired boiler = 3 · OS Boilers: 2 coal-fired outsource boilers ·
+   Biomass: 1). */
+const STEAM_SOURCES = [
+  { key: 'whrb' as const, label: 'WHRBs', short: 'WHRB', color: 'var(--whrb)' },
+  { key: 'gas' as const, label: 'Gas Boilers', short: 'Gas', color: 'var(--gasb)' },
+  { key: 'os' as const, label: 'OS Boilers', short: 'OS', color: 'var(--osb)' },
+  { key: 'biomass' as const, label: 'Biomass', short: 'Bio', color: 'var(--biomass)' },
 ]
 
 const fmtMW = (kw: number) => (kw / 1000).toFixed(1)
@@ -130,6 +151,8 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
 
   const allAms = categories.flatMap(categoryAms)
   const onlineCount = allAms.filter((a) => a.live).length
+  const steamAms = allAms.filter((a) => a.hasSteam)
+  const steamOnlineCount = steamAms.filter((a) => a.live).length
   let plantPower = 0, plantSteam = 0
   for (const a of allAms) { const t = summary[a.id]; if (t) { plantPower += t.power; plantSteam += t.steam } }
 
@@ -141,6 +164,14 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
   }
   const srcSum = srcTotals.gen + srcTotals.hfo + srcTotals.ke + srcTotals.solar
 
+  // Plant-level steam source mix, summed across all reporting mills.
+  const steamSrcTotals: SteamSplit = { gas: 0, os: 0, biomass: 0, whrb: 0 }
+  for (const a of allAms) {
+    const s = summary[a.id]?.steamSrc
+    if (s) { steamSrcTotals.gas += s.gas; steamSrcTotals.os += s.os; steamSrcTotals.biomass += s.biomass; steamSrcTotals.whrb += s.whrb }
+  }
+  const steamSrcSum = steamSrcTotals.gas + steamSrcTotals.os + steamSrcTotals.biomass + steamSrcTotals.whrb
+
   const today = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })
 
   return (
@@ -149,7 +180,7 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
       <p className="text-[13px] text-[var(--ink-3)]">{today}</p>
       <h1 className="text-xl font-bold tracking-tight mt-0.5 mb-4">Good day, {name}</h1>
 
-      {/* ── Hero: totals + live sparkline + source mix ── */}
+      {/* ── Power hero: total + live sparkline + source mix ── */}
       <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden mb-5">
         <div className="p-5 sm:p-6 pb-0">
           <div className="flex items-center justify-between">
@@ -168,11 +199,6 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
               <span className="text-lg font-semibold text-[var(--ink-3)]">MW</span>
             </p>
             <div className="flex items-center gap-5 pb-1">
-              <p className="flex items-baseline gap-1.5">
-                <Flame size={14} className="self-center text-[var(--ink-3)]" />
-                <span className="text-xl font-bold tabular-nums leading-none">{fmtTH(plantSteam)}</span>
-                <span className="text-[11px] font-medium text-[var(--ink-3)]">T/H</span>
-              </p>
               <p className="flex items-baseline gap-1.5">
                 <Zap size={14} className="self-center text-[var(--ink-3)]" />
                 <span className="text-xl font-bold tabular-nums leading-none">{onlineCount}<span className="text-[var(--ink-3)]">/{allAms.length}</span></span>
@@ -209,6 +235,65 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
                   <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
                   {s.label}
                   <span className="text-[var(--ink-3)]">{fmtMW(srcTotals[s.key])} MW · {srcSum > 0 ? Math.round((srcTotals[s.key] / srcSum) * 100) : 0}%</span>
+                </span>
+              ) : null
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Steam hero: total + source mix (no trend — see spec) ── */}
+      <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden mb-5">
+        <div className="p-5 sm:p-6 pb-0">
+          <div className="flex items-center justify-between">
+            <p className="text-[13px] font-medium text-[var(--ink-2)]">Total steam generation</p>
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--ok)] bg-[var(--teal-soft)] rounded-full px-2.5 py-1">
+              <span className="relative flex w-1.5 h-1.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[var(--ok)] opacity-50 animate-ping" />
+                <span className="relative inline-flex w-1.5 h-1.5 rounded-full bg-[var(--ok)]" />
+              </span>
+              Live
+            </span>
+          </div>
+          <div className="mt-2 flex items-end justify-between gap-4 flex-wrap">
+            <p className="flex items-baseline gap-2">
+              <span className="text-5xl font-extrabold tabular-nums tracking-tight leading-none text-[var(--teal-deep)]">{fmtTH(plantSteam)}</span>
+              <span className="text-lg font-semibold text-[var(--ink-3)]">T/H</span>
+            </p>
+            <div className="flex items-center gap-5 pb-1">
+              <p className="flex items-baseline gap-1.5">
+                <Flame size={14} className="self-center text-[var(--ink-3)]" />
+                <span className="text-xl font-bold tabular-nums leading-none">{steamOnlineCount}<span className="text-[var(--ink-3)]">/{steamAms.length}</span></span>
+                <span className="text-[11px] font-medium text-[var(--ink-3)]">online</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* steam source mix — WHRBs / Gas Boilers / OS Boilers / Biomass, plant-wide */}
+        <div className="px-5 sm:px-6 pb-5 mt-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--ink-3)]">Steam source mix</p>
+          </div>
+          <div className="flex h-2.5 rounded-full overflow-hidden bg-[var(--bg)]">
+            {steamSrcSum > 0 && STEAM_SOURCES.map((s) => (
+              steamSrcTotals[s.key] > 0 ? (
+                <div
+                  key={s.key}
+                  className="h-full transition-all duration-700"
+                  style={{ width: `${(steamSrcTotals[s.key] / steamSrcSum) * 100}%`, backgroundColor: s.color }}
+                  title={`${s.label} · ${fmtTH(steamSrcTotals[s.key])} T/H`}
+                />
+              ) : null
+            ))}
+          </div>
+          <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1.5">
+            {STEAM_SOURCES.map((s) => (
+              steamSrcTotals[s.key] > 0 ? (
+                <span key={s.key} className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[var(--ink-2)] tabular-nums">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: s.color }} />
+                  {s.label}
+                  <span className="text-[var(--ink-3)]">{fmtTH(steamSrcTotals[s.key])} T/H · {steamSrcSum > 0 ? Math.round((steamSrcTotals[s.key] / steamSrcSum) * 100) : 0}%</span>
                 </span>
               ) : null
             ))}
