@@ -1,4 +1,4 @@
-import { DASHBOARD_CATEGORIES, categoryAms, EXTRA_GROUP_SITES, EXTRA_INDIVIDUAL_SITES, GROUP_MEMBER_IDS, GROUP_SITE_IDS } from './dashboardCategories'
+import { DASHBOARD_CATEGORIES, categoryAms, GROUP_PERMISSIONS, PAGE_ALIAS_PERMISSIONS, GROUP_MEMBER_IDS, GROUP_SITE_IDS } from './dashboardCategories'
 
 // ── Roles ────────────────────────────────────────────────────────
 // admin   → all sites + user management
@@ -34,8 +34,8 @@ export const ALL_SITES: string[] = Array.from(
       ...((c.subgroups?.map((g) => g.id).filter(Boolean) as string[]) ?? []),
       ...categoryAms(c).map((a) => a.id),
     ]),
-    ...EXTRA_GROUP_SITES.map((g) => g.id),
-    ...EXTRA_INDIVIDUAL_SITES.map((s) => s.id),
+    ...GROUP_PERMISSIONS.map((g) => g.id),
+    ...PAGE_ALIAS_PERMISSIONS.map((s) => s.id),
   ]),
 )
 
@@ -51,19 +51,19 @@ export function effectiveSites(role: Role, sites: string[]): string[] {
   return role === 'admin' || role === 'manager' ? ALL_SITES : sites
 }
 
-const EXTRA_INDIVIDUAL_TARGET: Record<string, string> = Object.fromEntries(
-  EXTRA_INDIVIDUAL_SITES.map((s) => [s.id, s.grants]),
+const PAGE_ALIAS_TARGETS: Record<string, string> = Object.fromEntries(
+  PAGE_ALIAS_PERMISSIONS.map((s) => [s.id, s.grants]),
 )
 
 /** Access check for a given site. Admin/manager bypass the assigned list.
     A user holding a group id (e.g. "garments") also gets each mill inside
     that group ("am4", "am14", "am15") — the group grant covers its members.
-    A user holding an EXTRA_INDIVIDUAL_SITES id (e.g. "razzakabad_detail")
+    A user holding a PAGE_ALIAS_PERMISSIONS id (e.g. "razzakabad_detail")
     gets only the one page it aliases to — no member-mill expansion. */
 export function canAccessSite(role: Role, sites: string[], site: string): boolean {
   if (role === 'admin' || role === 'manager') return true
   if (sites.includes(site)) return true
-  if (sites.some((s) => EXTRA_INDIVIDUAL_TARGET[s] === site)) return true
+  if (sites.some((s) => PAGE_ALIAS_TARGETS[s] === site)) return true
   return sites.some((s) => GROUP_MEMBER_IDS[s]?.includes(site))
 }
 
@@ -72,12 +72,12 @@ export function canAccessSite(role: Role, sites: string[], site: string): boolea
     /dashboard/<id> mill page (razzakabad also has a separate, more detailed
     /dashboard/razzakabad cluster page — that page still exists and is still
     reachable, just not the auto-landing target for the group grant; the
-    overview page links to it directly). EXTRA_INDIVIDUAL_SITES ids (e.g.
+    overview page links to it directly). PAGE_ALIAS_PERMISSIONS ids (e.g.
     "razzakabad_detail") link straight to the page they alias to. Use this
     anywhere a site id gets turned into a link (site switcher, landing
     redirect). */
 export function siteHref(id: string): string {
-  if (EXTRA_INDIVIDUAL_TARGET[id]) return `/dashboard/${EXTRA_INDIVIDUAL_TARGET[id]}`
+  if (PAGE_ALIAS_TARGETS[id]) return `/dashboard/${PAGE_ALIAS_TARGETS[id]}`
   return GROUP_SITE_IDS.has(id) ? `/dashboard/overview/${id}` : `/dashboard/${id}`
 }
 

@@ -53,7 +53,7 @@ export function categoryAmsByName(name: string): DashboardAM[] {
 // that category's own /dashboard/overview/<id> page — not a partial view.
 // `categoryName` is the DASHBOARD_CATEGORIES lookup key (kept separate from
 // `label`, which is just display text and may not match the category name).
-export const EXTRA_GROUP_SITES: { id: string; label: string; categoryName: string }[] = [
+export const GROUP_PERMISSIONS: { id: string; label: string; categoryName: string }[] = [
   { id: 'garments', label: 'Garments', categoryName: 'Garments' },
 ]
 
@@ -65,7 +65,7 @@ export const EXTRA_GROUP_SITES: { id: string; label: string; categoryName: strin
 // under "Individual mill access" in the admin form (it isn't a
 // GROUP_MEMBER_IDS key), separate from and independent of the matching
 // group checkbox — an admin can grant either, both, or neither.
-export const EXTRA_INDIVIDUAL_SITES: { id: string; label: string; grants: string }[] = [
+export const PAGE_ALIAS_PERMISSIONS: { id: string; label: string; grants: string }[] = [
   { id: 'razzakabad_detail', label: 'Razzakabad (Full View)', grants: 'razzakabad' },
 ]
 
@@ -115,8 +115,8 @@ export const SITE_LABELS: Record<string, string> = Object.fromEntries([
     ...(c.subgroups ?? []).flatMap((g) => (g.id ? [[g.id, g.name] as const] : [])),
     ...categoryAms(c).map((a) => [a.id, a.label] as const),
   ]),
-  ...EXTRA_GROUP_SITES.map((g) => [g.id, g.label] as const),
-  ...EXTRA_INDIVIDUAL_SITES.map((s) => [s.id, s.label] as const),
+  ...GROUP_PERMISSIONS.map((g) => [g.id, g.label] as const),
+  ...PAGE_ALIAS_PERMISSIONS.map((s) => [s.id, s.label] as const),
 ])
 
 /** Display label for a site id, falling back to the upper-cased id. */
@@ -129,7 +129,7 @@ export function siteLabel(id: string): string {
 // just the group overview page — used by canAccessSite in constants.ts.
 export const GROUP_MEMBER_IDS: Record<string, string[]> = {
   razzakabad: subgroupAmsById('razzakabad').map((a) => a.id),
-  ...Object.fromEntries(EXTRA_GROUP_SITES.map((g) => [g.id, categoryAmsByName(g.categoryName).map((a) => a.id)])),
+  ...Object.fromEntries(GROUP_PERMISSIONS.map((g) => [g.id, categoryAmsByName(g.categoryName).map((a) => a.id)])),
 }
 
 // Which ids are "group" ids — get the /dashboard/overview/<id> landing
