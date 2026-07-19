@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Sun, Flame, Factory, Zap, ChevronLeft, ChevronRight, ChevronDown, X } from 'lucide-react'
 import { useMobileSidebar } from './MobileSidebar'
 import { siteLabel } from '@/lib/dashboardCategories'
+import { siteHref } from '@/lib/constants'
 
 interface Props {
   site: string        // current site e.g. "am4"
@@ -156,7 +157,7 @@ function SidebarBody({ site, label, allowedSites }: Omit<Props, 'accentColor'>) 
               return (
                 <Link
                   key={s}
-                  href={`/dashboard/${s}`}
+                  href={siteHref(s)}
                   className={`flex items-center justify-between h-11 md:h-8 px-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive ? 'bg-brand-subtle text-ink' : 'text-ink-secondary hover:text-ink hover:bg-canvas'
                   }`}

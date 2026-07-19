@@ -7,7 +7,15 @@ import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Alert } from '@/components/ui/Alert'
 import { ALL_SITES, ROLE_VALUES, type Role } from '@/lib/constants'
-import { siteLabel } from '@/lib/dashboardCategories'
+import { siteLabel, GROUP_SITE_IDS } from '@/lib/dashboardCategories'
+
+// Split the site-access list so group grants (Garments, Razzakabad — each
+// covers a whole category's worth of mills in one grant) are visually
+// separate from individual mills, making it obvious at a glance which kind
+// of access an admin is picking. GROUP_SITE_IDS stays correct automatically
+// if a group is added later — same set constants.ts uses for routing.
+const GROUP_SITES = ALL_SITES.filter((s) => GROUP_SITE_IDS.has(s))
+const INDIVIDUAL_SITES = ALL_SITES.filter((s) => !GROUP_SITE_IDS.has(s))
 
 interface AdminUser {
   id: string
@@ -195,33 +203,23 @@ export default function AdminUsersPage() {
             </div>
 
             {form.role === 'user' ? (
-              <div>
-                <p className="text-sm font-medium text-ink mb-2">Site access</p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {ALL_SITES.map((s) => {
-                    const checked = form.sites.includes(s)
-                    return (
-                      <label
-                        key={s}
-                        className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm cursor-pointer transition-colors ${
-                          checked ? 'border-brand bg-brand-subtle text-ink' : 'border-line text-ink-secondary hover:bg-canvas'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="accent-brand"
-                          checked={checked}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              sites: e.target.checked ? [...form.sites, s] : form.sites.filter((x) => x !== s),
-                            })
-                          }
-                        />
-                        {siteLabel(s)}
-                      </label>
-                    )
-                  })}
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-ink mb-2">Group access</p>
+                  <p className="text-[12px] text-ink-muted mb-2">Grants every mill in the category at once.</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {GROUP_SITES.map((s) => (
+                      <SiteCheckbox key={s} site={s} form={form} setForm={setForm} />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-ink mb-2">Individual mill access</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {INDIVIDUAL_SITES.map((s) => (
+                      <SiteCheckbox key={s} site={s} form={form} setForm={setForm} />
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : (
@@ -288,6 +286,38 @@ export default function AdminUsersPage() {
         </div>
       )}
     </main>
+  )
+}
+
+function SiteCheckbox({
+  site,
+  form,
+  setForm,
+}: {
+  site: string
+  form: FormState
+  setForm: (f: FormState) => void
+}) {
+  const checked = form.sites.includes(site)
+  return (
+    <label
+      className={`flex items-center gap-2 h-10 px-3 rounded-lg border text-sm cursor-pointer transition-colors ${
+        checked ? 'border-brand bg-brand-subtle text-ink' : 'border-line text-ink-secondary hover:bg-canvas'
+      }`}
+    >
+      <input
+        type="checkbox"
+        className="accent-brand"
+        checked={checked}
+        onChange={(e) =>
+          setForm({
+            ...form,
+            sites: e.target.checked ? [...form.sites, site] : form.sites.filter((x) => x !== site),
+          })
+        }
+      />
+      {siteLabel(site)}
+    </label>
   )
 }
 

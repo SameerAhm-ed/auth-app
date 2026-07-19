@@ -32,7 +32,7 @@ export async function proxy(req: NextRequest) {
   if (pathname === '/dashboard') {
     const eff = effectiveSites(payload.role, payload.sites)
     if (eff.length === 1) {
-      return NextResponse.redirect(new URL(`/dashboard/${eff[0]}`, req.url))
+      return NextResponse.redirect(new URL(landingPath(payload.role, payload.sites), req.url))
     }
   }
 
