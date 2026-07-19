@@ -3,11 +3,15 @@
 //   id    → route slug (/dashboard/<id>) and permission key (see SITE_PERMISSIONS)
 //   label → display name
 //   live  → true = instrumented (green "Online"); omit for placeholders ("Coming soon")
+//   hasSteam → true = computeSummary() returns a real steam value for this AM
+//              (AM8/AM17/AM14 are hardcoded to steam: 0 — not instrumented — so
+//              they're excluded even though AM14 is `live` for power)
 //   icon  → category icon key (resolved to a lucide icon in DashboardGrid)
 export interface DashboardAM {
   id: string
   label: string
   live?: boolean
+  hasSteam?: boolean
 }
 // A named cluster of mills within a category (e.g. a site/location).
 // `id` → the cluster has its own dashboard at /dashboard/<id> (clickable header).
@@ -37,9 +41,9 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
         id: 'razzakabad',
         name: 'Razzakabad',
         ams: [
-          { id: 'am5', label: 'AM5', live: true },
+          { id: 'am5', label: 'AM5', live: true, hasSteam: true },
           { id: 'am8', label: 'AM8', live: true },
-          { id: 'am17', label: 'AM17', live: true },
+          { id: 'am17', label: 'AM17', live: true, hasSteam: true },
         ],
       },
     ],
@@ -53,9 +57,9 @@ export const DASHBOARD_CATEGORIES: DashboardCategory[] = [
     name: 'Garments',
     icon: 'factory',
     ams: [
-      { id: 'am4', label: 'AM4', live: true },
+      { id: 'am4', label: 'AM4', live: true, hasSteam: true },
       { id: 'am14', label: 'AM14', live: true },
-      { id: 'am15', label: 'AM15', live: true },
+      { id: 'am15', label: 'AM15', live: true }, // steam sensors (Tower 1/2) are distribution meters, not generation — see summaryMath.ts
     ],
   },
   {
