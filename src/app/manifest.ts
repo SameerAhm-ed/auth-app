@@ -5,7 +5,11 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Artistic Milliners Dashboard',
     short_name: 'EMS',
     description: 'Energy management & monitoring dashboard',
-    start_url: '/dashboard',
+    // '/login' resolves for everyone: an authed session is bounced straight to
+    // the dashboard by the proxy, a logged-out user sees login. '/dashboard'
+    // would 307-redirect for logged-out users, so the installed app would open
+    // onto a redirect.
+    start_url: '/login',
     scope: '/',
     display: 'standalone',
     background_color: '#ffffff',

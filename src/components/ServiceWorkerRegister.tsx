@@ -1,21 +1,28 @@
 'use client'
 
 import { useEffect } from 'react'
-// Side-effect import: registers the beforeinstallprompt listener as soon as
-// this (root-mounted, route-independent) bundle loads — see src/lib/installPrompt.ts.
-import '@/lib/installPrompt'
 
-/** Registers the service worker once on the client (production-capable browsers). */
+/**
+ * Registers the service worker once on the client. A controlling SW with a
+ * fetch handler is a hard precondition for the install prompt, so register
+ * as soon as possible: immediately if the page already finished loading
+ * (the 'load' event may have fired before this effect runs, in which case a
+ * bare load listener would never fire), otherwise on load.
+ */
 export function ServiceWorkerRegister() {
   useEffect(() => {
     if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
-    const onLoad = () => {
+    const register = () => {
       navigator.serviceWorker.register('/sw.js').catch((err) => {
         console.error('SW registration failed:', err)
       })
     }
-    window.addEventListener('load', onLoad)
-    return () => window.removeEventListener('load', onLoad)
+    if (document.readyState === 'complete') {
+      register()
+    } else {
+      window.addEventListener('load', register, { once: true })
+      return () => window.removeEventListener('load', register)
+    }
   }, [])
 
   return null
