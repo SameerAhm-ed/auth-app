@@ -36,10 +36,13 @@ const LIGHT = {
 
 const DARK = {
   '--bg': '#0f1113',
-  '--card': '#16181b',
-  '--card-2': '#1b1e22',
-  '--line': '#262a2e',
-  '--line-2': '#363b41',
+  // Elevated surfaces sit a real luminance step above the canvas — dark
+  // drop-shadows don't register on a near-black bg, so separation comes from
+  // fill + border, not shadow. (Card vs canvas ~1.06:1 → ~1.18:1.)
+  '--card': '#1e2227',
+  '--card-2': '#282d33',
+  '--line': '#3a4047',
+  '--line-2': '#4a5158',
   '--ink': '#e9ebee',
   '--ink-2': '#a3a8ae',
   '--ink-3': '#70767d',
@@ -236,7 +239,7 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
       </div>
 
       {/* ── Power hero: total + live sparkline + source mix ── */}
-      <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden mb-5">
+      <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_2px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.04)] overflow-hidden mb-5">
         <div className="p-5 sm:p-6 pb-0">
           <div className="flex items-center justify-between">
             <p className="text-[13px] font-medium text-[var(--ink-2)]">Total power generation</p>
@@ -298,7 +301,7 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
       </section>
 
       {/* ── Steam hero: total + source mix (no trend — see spec) ── */}
-      <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden mb-5">
+      <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_2px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.04)] overflow-hidden mb-5">
         <div className="p-5 sm:p-6 pb-0">
           <div className="flex items-center justify-between">
             <p className="text-[13px] font-medium text-[var(--ink-2)]">Total steam generation</p>
@@ -370,7 +373,7 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
                 <span className="text-xs text-[var(--ink-3)]">{on} of {mills.length} online</span>
               </div>
 
-              <div className="rounded-xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden">
+              <div className="rounded-xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_2px_rgba(0,0,0,0.30),inset_0_1px_0_rgba(255,255,255,0.04)] overflow-hidden">
                 {/* group subtotal strip */}
                 <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[var(--line)] bg-[var(--card-2)] text-xs tabular-nums">
                   <span className="inline-flex items-center gap-1.5 text-[var(--ink-2)]">
