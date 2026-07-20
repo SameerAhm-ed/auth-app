@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import Link from 'next/link'
-import { Zap, Flame, MapPin, ChevronRight } from 'lucide-react'
+import { Zap, Flame, MapPin, ChevronRight, Cloud, CloudRain, CloudSun, Sun } from 'lucide-react'
 import { categoryAms, type DashboardAM, type DashboardCategory, type DashboardSubgroup } from '@/lib/dashboardCategories'
 
 type SrcSplit = { gen: number; hfo: number; ke: number; solar: number }
@@ -95,6 +95,54 @@ function useAppDark() {
   return useSyncExternalStore(darkSubscribe, darkSnapshot, () => false)
 }
 
+/* ── Weather chip — Karachi (AM4/AM5/AM14/AM15/AM17 cluster), Open-Meteo
+   (no key). Refreshed every 10 min, not on the 1s live-data cadence. ────── */
+const WEATHER_LAT = 24.86, WEATHER_LON = 67.01
+
+function weatherIcon(code: number) {
+  if (code === 0) return Sun
+  if (code <= 3) return CloudSun
+  if (code >= 51 && code <= 82) return CloudRain
+  return Cloud
+}
+function weatherLabel(code: number) {
+  if (code === 0) return 'Clear'
+  if (code <= 3) return 'Partly cloudy'
+  if (code >= 45 && code <= 48) return 'Fog'
+  if (code >= 51 && code <= 82) return 'Rain'
+  return 'Cloudy'
+}
+
+function useWeather() {
+  const [state, setState] = useState<{ temp: number; code: number } | 'loading' | 'error'>('loading')
+  useEffect(() => {
+    let cancelled = false
+    const load = () => {
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current=temperature_2m,weather_code&timezone=auto`)
+        .then((r) => r.json())
+        .then((j) => { if (!cancelled) setState({ temp: j.current.temperature_2m, code: j.current.weather_code }) })
+        .catch(() => { if (!cancelled) setState('error') })
+    }
+    load()
+    const id = setInterval(load, 10 * 60 * 1000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+  return state
+}
+
+function WeatherChip() {
+  const weather = useWeather()
+  if (weather === 'loading' || weather === 'error') return null
+  const Icon = weatherIcon(weather.code)
+  return (
+    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-2)] bg-[var(--card-2)] border border-[var(--line)] rounded-full px-3 py-1.5 shrink-0">
+      <Icon size={15} className="text-[var(--teal)]" />
+      {Math.round(weather.temp)}°C
+      <span className="text-[var(--ink-3)] text-xs">{weatherLabel(weather.code)}</span>
+    </span>
+  )
+}
+
 /**
  * Categorized overview. Categories/AMs (already role-filtered) come from the
  * server; live Power/Steam + per-mill source split are polled from
@@ -177,8 +225,13 @@ export function DashboardGrid({ categories, name }: { categories: DashboardCateg
   return (
     <div style={{ ...(dark ? DARK : LIGHT), colorScheme: dark ? 'dark' : 'light' } as CSSProperties} className="text-[var(--ink)]">
       {/* Greeting */}
-      <p className="text-[13px] text-[var(--ink-3)]">{today}</p>
-      <h1 className="text-xl font-bold tracking-tight mt-0.5 mb-4">Good day, {name}</h1>
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <p className="text-[13px] text-[var(--ink-3)]">{today}</p>
+          <h1 className="text-xl font-bold tracking-tight mt-0.5">Good day, {name}</h1>
+        </div>
+        <WeatherChip />
+      </div>
 
       {/* ── Power hero: total + live sparkline + source mix ── */}
       <section className="rounded-2xl bg-[var(--card)] border border-[var(--line)] shadow-[0_1px_3px_rgba(25,27,29,0.06)] overflow-hidden mb-5">
