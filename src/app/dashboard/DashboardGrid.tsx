@@ -99,11 +99,14 @@ function useAppDark() {
    (no key). Refreshed every 10 min, not on the 1s live-data cadence. ────── */
 const WEATHER_LAT = 24.86, WEATHER_LON = 67.01
 
-function weatherIcon(code: number) {
-  if (code === 0) return Sun
-  if (code <= 3) return CloudSun
-  if (code >= 51 && code <= 82) return CloudRain
-  return Cloud
+/* Returns a rendered element (not a component ref) so we never alias a
+   dynamic component in render — satisfies react-hooks/static-components. */
+function WeatherGlyph({ code }: { code: number }) {
+  const cls = 'text-[var(--teal)]'
+  if (code === 0) return <Sun size={15} className={cls} />
+  if (code <= 3) return <CloudSun size={15} className={cls} />
+  if (code >= 51 && code <= 82) return <CloudRain size={15} className={cls} />
+  return <Cloud size={15} className={cls} />
 }
 function weatherLabel(code: number) {
   if (code === 0) return 'Clear'
@@ -133,10 +136,9 @@ function useWeather() {
 function WeatherChip() {
   const weather = useWeather()
   if (weather === 'loading' || weather === 'error') return null
-  const Icon = weatherIcon(weather.code)
   return (
     <span className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-2)] bg-[var(--card-2)] border border-[var(--line)] rounded-full px-3 py-1.5 shrink-0">
-      <Icon size={15} className="text-[var(--teal)]" />
+      <WeatherGlyph code={weather.code} />
       {Math.round(weather.temp)}°C
       <span className="text-[var(--ink-3)] text-xs">{weatherLabel(weather.code)}</span>
     </span>
