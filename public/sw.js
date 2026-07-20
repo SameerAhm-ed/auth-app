@@ -4,8 +4,11 @@
    - navigations: network-first, fall back to cache, then /offline.
    - other same-origin GET (static assets, /_next/*): cache-first, fill cache as used.
    Bump CACHE to invalidate old caches on deploy. */
-const CACHE = 'ems-shell-v1'
-const PRECACHE = ['/offline', '/icons/icon-192.png', '/manifest.webmanifest']
+const CACHE = 'ems-shell-v2'
+// Manifest is deliberately NOT precached — it must stay fresh so start_url /
+// icon changes reach returning users on the next visit rather than being
+// pinned by a cache-first response.
+const PRECACHE = ['/offline', '/icons/icon-192.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -33,6 +36,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return // cross-origin: let the network handle it
   if (url.pathname.startsWith('/api/')) return // live data: network-only
+  if (url.pathname === '/manifest.webmanifest') return // manifest: always fresh from network
 
   // Navigations: network-first → cache → offline page.
   if (request.mode === 'navigate') {
