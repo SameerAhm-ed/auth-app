@@ -12,9 +12,14 @@ export async function GET() {
       query('am5', configAM5, 'SELECT Takeoff4kw, Takeoff5kw, Takeoff6kw, Takeoff7kw, Takeoff8kw, AUX_LV_Takeoff FROM powerhouse2'),
       query('am5', configAM5, 'SELECT Takeoff1kw, Takeoff2kw, Takeoff3kw, Takeoff4kw FROM powerhouse3'),
       query('am5', configAM5, 'SELECT AUXILIARY_kw, TOWARDS_PH1_kw, AM17_B_kw FROM AM17_PH2'),
-      // AM5-only solar (3 arrays). The dashboard table's `totalsolargen` is the
-      // whole cluster, so the AM5-specific overview reads this aggregate instead.
-      query('am5', configAM5, 'SELECT solar_total_kW FROM Solar'),
+      // AM5-only solar, summed from the individual arrays rather than the
+      // `Solar` table's `solar_total_kW` column: that DB-computed column
+      // still reflects the old AM19-under-AM17 split and hasn't been updated
+      // to include AM19_solar_kW under AM5 (see summaryMath.ts for the
+      // canonical split). Once the DB column is fixed, this can go back to
+      // `SELECT solar_total_kW FROM Solar`. The dashboard table's
+      // `totalsolargen` is the whole cluster, so it's not used here either.
+      query('am5', configAM5, 'SELECT solar3_kW, solar4_kW, solar5_kW, AM18_solar_kW, AM19_solar_kW FROM Solar'),
     ])
 
     return {

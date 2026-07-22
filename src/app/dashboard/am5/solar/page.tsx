@@ -24,9 +24,11 @@ const ARRAYS: ArrayCfg[] = [
   { section: 'AM5 Solar', label: 'Solar LT-3', kw: 'solar3_kW', capacity: 500, tag: 13 },
   { section: 'AM5 Solar', label: 'Solar LT-4', kw: 'solar4_kW', capacity: 625, tag: 15 },
   { section: 'AM5 Solar', label: 'Solar LT-5', kw: 'solar5_kW', capacity: 500, tag: 11 },
+  // Moved from /dashboard/am17/solar.
+  { section: 'AM19 Solar', label: 'AM-19 Solar', kw: 'AM19_solar_kW', capacity: 4000, tag: 4454 },
 ]
 
-const SECTIONS = ['AM5 Solar']
+const SECTIONS = ['AM5 Solar', 'AM19 Solar']
 const TAGS = ARRAYS.map((a) => a.tag)
 
 const fmtKwh = (n?: number) =>
@@ -121,7 +123,7 @@ export default function AM5SolarPage() {
       </div>
 
       {loading ? (
-        <MetricGridSkeleton count={3} />
+        <MetricGridSkeleton count={4} />
       ) : error && !row ? (
         <StateCard variant="error" title="Couldn't load data" message={error} />
       ) : !row ? (

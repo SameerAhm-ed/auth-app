@@ -23,7 +23,7 @@ interface ArrayCfg {
 const ARRAYS: ArrayCfg[] = [
   { section: 'AM17 Solar', label: 'Solar-1 AM17', kw: 'AM17_solar1_kW', capacity: 908, tag: 188 },
   { section: 'AM17 Solar', label: 'Solar-2 AM17', kw: 'AM17_solar2_kW', capacity: 750, tag: 190 },
-  { section: 'AM19 Solar', label: 'AM-19 Solar', kw: 'AM19_solar_kW', capacity: 4000, tag: 4454 },
+  // AM-19 Solar (tag 4454) moved to /dashboard/am5/solar — kept here.
   { section: 'AM19 Solar', label: 'AM-19_2 Solar', kw: 'AM19_2_solar_kW', capacity: 4000, tag: 4457 },
 ]
 
@@ -122,7 +122,7 @@ export default function AM17SolarPage() {
       </div>
 
       {loading ? (
-        <MetricGridSkeleton count={4} />
+        <MetricGridSkeleton count={3} />
       ) : error && !row ? (
         <StateCard variant="error" title="Couldn't load data" message={error} />
       ) : !row ? (
