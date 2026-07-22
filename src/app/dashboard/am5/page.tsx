@@ -33,7 +33,7 @@ interface PH1T { takeoff1kw: number; takeoff2kw: number; takeoff3kw: number }
 interface PH2T { Takeoff4kw: number; Takeoff5kw: number; Takeoff6kw: number; Takeoff7kw: number; Takeoff8kw: number; AUX_LV_Takeoff: number }
 interface PH3T { Takeoff1kw: number; Takeoff2kw: number; Takeoff3kw: number; Takeoff4kw: number }
 interface AM17T { AUXILIARY_kw: number; TOWARDS_PH1_kw: number; AM17_B_kw: number }
-interface SolarRow { solar_total_kW: number }
+interface SolarRow { solar3_kW: number; solar4_kW: number; solar5_kW: number; AM18_solar_kW: number; AM19_solar_kW: number }
 interface ApiResponse {
   dashboard: DashboardRow[]
   ph1_takeoffs: PH1T[]
@@ -81,8 +81,13 @@ export default function AM5DashboardPage() {
   }, [])
 
   const row = resp?.dashboard?.[0]
-  // AM5-only solar (dashboard.totalsolargen is the whole cluster).
-  const solarKw = resp?.am5_solar?.[0]?.solar_total_kW ?? 0
+  // AM5-only solar, summed here rather than trusting the DB's
+  // `solar_total_kW` column (still missing AM19_solar_kW — see the API
+  // route). dashboard.totalsolargen is the whole cluster, not used here.
+  const sol = resp?.am5_solar?.[0]
+  const solarKw = sol
+    ? (sol.solar3_kW ?? 0) + (sol.solar4_kW ?? 0) + (sol.solar5_kW ?? 0) + (sol.AM18_solar_kW ?? 0) + (sol.AM19_solar_kW ?? 0)
+    : 0
 
   return (
     <div className="space-y-6">

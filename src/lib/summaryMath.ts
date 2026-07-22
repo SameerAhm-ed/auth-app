@@ -38,8 +38,8 @@ const n = (v: number | undefined) => Number(v ?? 0)
  * `src = { gen, hfo, ke, solar }` (gas self-generation vs HFO engines vs KE
  * grid import vs solar). The AM5 `dashboard` table physically covers AM5,
  * AM17 and AM8, so those are split out here:
- *   - AM5  = GAS (PH1 + PH2) + AM5 solar (LT-3/4/5 + AM18); steam = PH1/2 + coal boilers
- *   - AM17 = GAS (CAT + ENGINE1/2/3) + HFO (MAN + MAK1/2) + KE + AM17 solar; steam = 0 (not wired)
+ *   - AM5  = GAS (PH1 + PH2) + AM5 solar (LT-3/4/5 + AM18 + AM19); steam = PH1/2 + coal boilers
+ *   - AM17 = GAS (CAT + ENGINE1/2/3) + HFO (MAN + MAK1/2) + KE + AM17 solar (arrays 1/2 + AM19_2); steam = 0 (not wired)
  *   - AM8  = AM8 solar only;                                 steam = 0
  * KE grid import belongs to AM17 (not AM5); the AM5→AM17 tie (AM5_KW) is
  * excluded from AM17 to avoid double-counting. Solar comes from the `Solar` table.
@@ -47,8 +47,10 @@ const n = (v: number | undefined) => Number(v ?? 0)
 const NO_STEAM: SteamSplit = { gas: 0, os: 0, biomass: 0, whrb: 0 }
 
 export function computeSummary({ r4, r5, s5, r14, r15, p3, p4, ph1 }: SummaryInputs): Summary {
-  const am5Sol = n(s5.solar3_kW) + n(s5.solar4_kW) + n(s5.solar5_kW) + n(s5.AM18_solar_kW)
-  const am17Sol = n(s5.AM17_solar1_kW) + n(s5.AM17_solar2_kW) + n(s5.AM19_solar_kW) + n(s5.AM19_2_solar_kW)
+  // AM-19 Solar (AM19_solar_kW) moved from AM17 to AM5 — attribution follows
+  // the card on /dashboard/am5/solar. AM-19_2 Solar stays on AM17.
+  const am5Sol = n(s5.solar3_kW) + n(s5.solar4_kW) + n(s5.solar5_kW) + n(s5.AM18_solar_kW) + n(s5.AM19_solar_kW)
+  const am17Sol = n(s5.AM17_solar1_kW) + n(s5.AM17_solar2_kW) + n(s5.AM19_2_solar_kW)
   const am8Sol = n(s5.AM8_solar_kW)
 
   const am4Gen = n(r4.ENGINE_1_KW) + n(r4.ENGINE_2_KW) + n(r4.ENGINE_3_KW) + n(r4.ENGINE_4_KW) + n(r4.ENGINE_6_KW) + n(r4.ENGINE_7_KW)
