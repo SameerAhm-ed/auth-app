@@ -151,7 +151,19 @@ function Content({ row, solarKw, reconnecting }: { row: DashboardRow; solarKw: n
 
       {/* Electrical generation */}
       <Card className="overflow-hidden">
-        <CardHead icon={<Zap size={16} className="text-ink-muted" aria-hidden="true" />} title="Electrical Power Generation" />
+        <CardHead
+          icon={<Zap size={16} className="text-ink-muted" aria-hidden="true" />}
+          title="Electrical Power Generation"
+          action={
+            <Link
+              href="/dashboard/am5/reports/electrical"
+              aria-label="Open electrical generation report"
+              className="w-11 h-11 md:w-9 md:h-9 -mr-1 shrink-0 flex items-center justify-center rounded-lg text-ink-muted hover:text-ink hover:bg-canvas transition-colors"
+            >
+              <BarChart3 size={16} />
+            </Link>
+          }
+        />
         <div className="p-5">
           <Donut segments={elec} hero={(elecTotal / 1000).toFixed(1)} sublabel="MW total" />
         </div>

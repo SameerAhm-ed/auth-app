@@ -21,14 +21,14 @@ interface ArrayCfg {
 }
 
 const ARRAYS: ArrayCfg[] = [
-  { section: 'AM5 Solar', label: 'Solar LT-3', kw: 'solar3_kW', capacity: 500, tag: 13 },
-  { section: 'AM5 Solar', label: 'Solar LT-4', kw: 'solar4_kW', capacity: 625, tag: 15 },
-  { section: 'AM5 Solar', label: 'Solar LT-5', kw: 'solar5_kW', capacity: 500, tag: 11 },
+  { section: 'AM5 Solar', label: 'Solar LT-3', kw: 'solar3_kW', capacity: 700, tag: 13 },
+  { section: 'AM5 Solar', label: 'Solar LT-4', kw: 'solar4_kW', capacity: 600, tag: 15 },
+  { section: 'AM5 Solar', label: 'Solar LT-5', kw: 'solar5_kW', capacity: 700, tag: 11 },
   { section: 'AM17 Solar', label: 'Solar-1 AM17', kw: 'AM17_solar1_kW', capacity: 908, tag: 188 },
   { section: 'AM17 Solar', label: 'Solar-2 AM17', kw: 'AM17_solar2_kW', capacity: 750, tag: 190 },
   { section: 'AM8 Solar', label: 'AM-8 Solar', kw: 'AM8_solar_kW', capacity: 925, tag: 187 },
   { section: 'AM18 Solar', label: 'AM-18 Solar', kw: 'AM18_solar_kW', capacity: 675, tag: 192 },
-  { section: 'AM19 Solar', label: 'AM-19 Solar', kw: 'AM19_solar_kW', capacity: 4000, tag: 4454 },
+  { section: 'AM19 Solar', label: 'AM-19 Solar', kw: 'AM19_solar_kW', capacity: 6000, tag: 4454 },
   { section: 'AM19 Solar', label: 'AM-19_2 Solar', kw: 'AM19_2_solar_kW', capacity: 4000, tag: 4457 },
 ]
 
